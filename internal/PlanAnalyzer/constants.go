@@ -1,26 +1,25 @@
 package PlanAnalyzer
 
 const (
-	Create = "Create"
+	Create  = "Create"
 	Destroy = "Destroy"
-	Update = "Update"
+	Update  = "Update"
 	Replace = "Replace"
 )
 
-var SupportedAction = []string{Create,Destroy,Update,Replace,}
+var SupportedAction = []string{Create, Destroy, Update, Replace}
 
 var EmojiMap = map[string]string{
-	Create: ":pencil2:",
+	Create:  ":pencil2:",
 	Destroy: ":wastebasket:",
-	Update: ":fountain_pen:",
-	Replace: ":scissors:" ,
+	Update:  ":fountain_pen:",
+	Replace: ":scissors:",
 	"title": ":clipboard:",
 }
 
 var GitDiffMap = map[string]string{
-	Create: "+",
+	Create:  "+",
 	Destroy: "-",
-	Update: "!",
+	Update:  "!",
 	Replace: "~",
-} 
-
+}
