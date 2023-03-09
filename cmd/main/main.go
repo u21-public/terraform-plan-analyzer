@@ -1,45 +1,42 @@
 package main
 
 import (
-    "fmt"
-	"os"
-	"log"
+	"fmt"
+	"github.com/mattthaber/terraform-bulk-analyzer/internal/PlanAnalyzer"
 	"github.com/urfave/cli/v2"
-    "github.com/mattthaber/terraform-bulk-analyzer/internal/PlanAnalyzer"
-  )
+	"log"
+	"os"
+)
 
-  func main() {
-    app := &cli.App{
-        Name:  "Terraform Bulk Analyzer",
-        Usage: "Reads Plans -> Analayzes them -> prints report",
+func main() {
+	app := &cli.App{
+		Name:  "Terraform Bulk Analyzer",
+		Usage: "Reads Plans -> Analayzes them -> prints report",
 		Flags: []cli.Flag{
-            &cli.StringFlag{
-                Name:  "tfplans",
-                Usage: "Relative path to folder holding tfplans",
+			&cli.StringFlag{
+				Name:     "tfplans",
+				Usage:    "Relative path to folder holding tfplans",
 				Required: true,
-            },
+			},
 			&cli.BoolFlag{
-                Name:  "pretty",
-                Usage: "Pretty prints to console",
-            },
+				Name:  "pretty",
+				Usage: "Pretty prints to console",
+			},
 			&cli.BoolFlag{
-                Name:  "github",
-                Usage: "Posts report to github PR",
-            },
+				Name:  "github",
+				Usage: "Posts report to github PR",
+			},
 		},
 		Action: func(cCtx *cli.Context) error {
 			plans := PlanAnalyzer.ReadPlans(cCtx.String("tfplans"))
-            analyzedPlans := PlanAnalyzer.NewPlanAnalyzer(plans)
-            analyzedPlans.ProcessPlans()
-            report := analyzedPlans.GenerateReport()
-            fmt.Println(report)
-            return nil
-        },
-    }
-    if err := app.Run(os.Args); err != nil {
-        log.Fatal(err)
-    }
+			analyzedPlans := PlanAnalyzer.NewPlanAnalyzer(plans)
+			analyzedPlans.ProcessPlans()
+			report := analyzedPlans.GenerateReport()
+			fmt.Println(report)
+			return nil
+		},
+	}
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
 }
-
-
-
