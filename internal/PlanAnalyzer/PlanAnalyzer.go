@@ -36,6 +36,9 @@ func (pa *PlanAnalyzer) ProcessPlans(){
 		Replace: []string{},
 	}
 
+	// We run through all the plans and perform processing used for later
+	// NOTE: we are doing multiple proccesses in same for loop for performance
+	// reasons. Dont want to loop all changesets multiple times. 
 	for i,plan := range pa.Plans {
 		pa.ComparisonTable = append(pa.ComparisonTable, []string{
 			plan.Workspace, 
