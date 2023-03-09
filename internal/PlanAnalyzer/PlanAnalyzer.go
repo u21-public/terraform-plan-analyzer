@@ -7,7 +7,7 @@ import (
 )
 
 type PlanAnalyzer struct {
-	Plans []PlanExtended
+	Plans           []PlanExtended
 	ComparisonTable [][]string
 
 	// { <workspace>: {<action>: <resource>}}
@@ -19,29 +19,29 @@ type PlanAnalyzer struct {
 	SharedChanges map[string][]string
 }
 
-func (pa *PlanAnalyzer) ProcessPlans(){
+func (pa *PlanAnalyzer) ProcessPlans() {
 	fmt.Println("Comparing Workspaces...")
 
 	var hash = map[string]map[string]bool{
-		Create: map[string]bool{},
+		Create:  map[string]bool{},
 		Destroy: map[string]bool{},
-		Update: map[string]bool{},
+		Update:  map[string]bool{},
 		Replace: map[string]bool{},
 	}
 
 	var intersection = map[string][]string{
-		Create: []string{},
+		Create:  []string{},
 		Destroy: []string{},
-		Update: []string{},
+		Update:  []string{},
 		Replace: []string{},
 	}
 
 	// We run through all the plans and perform processing used for later
 	// NOTE: we are doing multiple proccesses in same for loop for performance
-	// reasons. Dont want to loop all changesets multiple times. 
-	for i,plan := range pa.Plans {
+	// reasons. Dont want to loop all changesets multiple times.
+	for i, plan := range pa.Plans {
 		pa.ComparisonTable = append(pa.ComparisonTable, []string{
-			plan.Workspace, 
+			plan.Workspace,
 			strconv.Itoa(len(plan.ToCreate)),
 			strconv.Itoa(len(plan.ToUpdate)),
 			strconv.Itoa(len(plan.ToDestroy)),
@@ -50,13 +50,13 @@ func (pa *PlanAnalyzer) ProcessPlans(){
 		pa.UniqueChanges[plan.Workspace] = plan.getActions()
 
 		// Hash intersection for quick slice comparison
-		for _,action := range SupportedAction {
+		for _, action := range SupportedAction {
 			for _, address := range pa.UniqueChanges[plan.Workspace][action] {
 				if i == 0 {
 					hash[action][address] = true
 				} else {
 					if _, ok := hash[action][address]; ok {
-						if i == len(pa.Plans) - 1 {
+						if i == len(pa.Plans)-1 {
 							intersection[action] = append(intersection[action], address)
 						}
 					} else {
@@ -86,7 +86,7 @@ func (pa *PlanAnalyzer) GenerateComparisonTable() string {
 		markdownTable = markdownTable + "|"
 		markdownTable = markdownTable + "\n"
 
-		if (row == 0) {
+		if row == 0 {
 			markdownTable = markdownTable + "|-|:-:|:-:|:-:|:-:|\n"
 		}
 	}
@@ -146,14 +146,13 @@ func (pa *PlanAnalyzer) GenerateReport() string {
 	UniqueChanges := pa.GenerateUniqueResources()
 
 	report = reportTitle + lastUpdated + markdownTable + sharedResources + UniqueChanges
-	return report 
+	return report
 }
 
-
 func NewPlanAnalyzer(plans []PlanExtended) PlanAnalyzer {
-	return PlanAnalyzer {
+	return PlanAnalyzer{
 		plans,
-		[][]string{[]string{ "Workspace", "To Create", "To Update", "To Destroy", "To Replace"},},
+		[][]string{[]string{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
 		map[string]map[string][]string{},
 		map[string][]string{},
 	}
