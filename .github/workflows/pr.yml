@@ -19,7 +19,7 @@ jobs:
         run: |
           go vet ./...
           test -z $(gofmt -l .)
-
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
