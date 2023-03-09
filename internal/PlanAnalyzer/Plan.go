@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"io/ioutil"
+	"io"
 	"strings"
 	"errors"
 	
@@ -69,14 +69,14 @@ func ParseWorkspaceName(planFileName string) (string, error) {
 	planBaseName :=  filepath.Base(planFileName)
 
 	if planBaseName == "." {
-		return "", errors.New("Filename given was empty string")
+		return "", errors.New("filename given was empty string")
 	}
 
 	planNoExt := strings.Split(planBaseName, ".json")[0]
 	planNoPrefix := strings.Split(planNoExt, "tfplan-")[1]
 
 	if (len(planNoPrefix) == 1){
-		return "", errors.New("Plan Filename must be prefixed with tfplan-")
+		return "", errors.New("plan filename must be prefixed with tfplan-")
 	}
 
 	return  planNoPrefix, nil
@@ -98,7 +98,7 @@ func ReadPlans(plansFolderPath string) ([]PlanExtended) {
 			fmt.Println(err)
 		}
 		defer jsonFile.Close()
-		byteValue, _ := ioutil.ReadAll(jsonFile)
+		byteValue, _ := io.ReadAll(jsonFile)
 		err_two := plan.UnmarshalJSON([]byte(byteValue))
 		if err_two != nil {
 			fmt.Println(err_two)
