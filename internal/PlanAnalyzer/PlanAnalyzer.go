@@ -22,19 +22,6 @@ type PlanAnalyzer struct {
 func (pa *PlanAnalyzer) ProcessPlans(){
 	fmt.Println("Comparing Workspaces...")
 
-	var hash = map[string]map[string]bool{
-		Create: map[string]bool{},
-		Destroy: map[string]bool{},
-		Update: map[string]bool{},
-		Replace: map[string]bool{},
-	}
-
-	var intersection = map[string][]string{
-		Create: []string{},
-		Destroy: []string{},
-		Update: []string{},
-		Replace: []string{},
-	}
 
 	// We run through all the plans and perform processing used for later
 	// NOTE: we are doing multiple proccesses in same for loop for performance
@@ -50,7 +37,6 @@ func (pa *PlanAnalyzer) ProcessPlans(){
 		pa.UniqueChanges[plan.Workspace] = plan.getActions()
 
 		// Hash intersection for quick slice comparison
-		// TODO: move to UTILS
 		for _,action := range SupportedAction {
 			for _, address := range pa.UniqueChanges[plan.Workspace][action] {
 				if i == 0 {
@@ -69,6 +55,8 @@ func (pa *PlanAnalyzer) ProcessPlans(){
 		pa.SharedChanges = intersection
 	}
 }
+
+func (pa *PlanAnalyzer) changeSetIntersection(hash *map[string]map[string]bool) 
 
 func (pa *PlanAnalyzer) GenerateLastUpdated() string {
 	currentTime := time.Now()
@@ -139,7 +127,7 @@ func (pa *PlanAnalyzer) GenerateUniqueResources() string {
 
 func (pa *PlanAnalyzer) GenerateReport() string {
 	var report string
-	
+
 	reportTitle := fmt.Sprintf("# %s Terraform Plan Analyzer Report!Variable string %s\n", EmojiMap["title"], EmojiMap["title"])
 	lastUpdated := pa.GenerateLastUpdated()
 	markdownTable := pa.GenerateComparisonTable()
