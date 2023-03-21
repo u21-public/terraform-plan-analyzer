@@ -149,8 +149,8 @@ func (pa *PlanAnalyzer) GenerateReport() string {
 	return report
 }
 
-func NewPlanAnalyzer(plans []PlanExtended) PlanAnalyzer {
-	return PlanAnalyzer{
+func NewPlanAnalyzer(plans []PlanExtended) *PlanAnalyzer {
+	return &PlanAnalyzer{
 		plans,
 		[][]string{[]string{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
 		map[string]map[string][]string{},

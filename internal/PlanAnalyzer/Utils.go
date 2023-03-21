@@ -1,5 +1,7 @@
 package PlanAnalyzer
 
+
+
 func getEmojis(changeSet map[string][]string) string {
 	emojis := ""
 	for action, resources := range changeSet {

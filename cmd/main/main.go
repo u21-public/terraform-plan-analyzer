@@ -32,7 +32,15 @@ func main() {
 			analyzedPlans := PlanAnalyzer.NewPlanAnalyzer(plans)
 			analyzedPlans.ProcessPlans()
 			report := analyzedPlans.GenerateReport()
-			fmt.Println(report)
+
+			reporter,err := PlanAnalyzer.NewReporter(cCtx.Bool("github"), report)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+			reporter.PostReport()
+
 			return nil
 		},
 	}
