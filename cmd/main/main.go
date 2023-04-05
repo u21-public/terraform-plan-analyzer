@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/mattthaber/terraform-bulk-analyzer/internal/PlanAnalyzer"
+	"github.com/u21-public/terraform-plan-analyzer/internal/PlanAnalyzer"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
