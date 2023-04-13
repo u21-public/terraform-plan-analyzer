@@ -17,7 +17,7 @@ var EmojiMap = map[string]string{
 	"title": ":clipboard:",
 }
 
-var GitDiffMap = map[string]string{
+var gitDiffMap = map[string]string{
 	Create:  "+",
 	Destroy: "-",
 	Update:  "!",
