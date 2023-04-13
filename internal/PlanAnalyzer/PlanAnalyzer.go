@@ -100,9 +100,11 @@ func (pa *PlanAnalyzer) GenerateSharedResources() string {
 
 	sharedResources = sharedResources + "## All Workspaces" + getEmojis(pa.SharedChanges) + "\n"
 	for action, changedResources := range pa.SharedChanges {
+
+		result, _ := getGitDiff(action)
 		// Open Code block
 		sharedResources = sharedResources + "```diff\n"
-		sharedResources = sharedResources + fmt.Sprintf("%s To %s %s\n", getGitDiff(action), action, getGitDiff(action))
+		sharedResources = sharedResources + fmt.Sprintf("%s To %s %s\n", result, action, result)
 		for _, resource := range changedResources {
 			sharedResources = sharedResources + fmt.Sprintf("~ %s\n", resource)
 		}
@@ -121,10 +123,12 @@ func (pa *PlanAnalyzer) GenerateUniqueResources() string {
 	for workspace, changeSet := range pa.UniqueChanges {
 		UniqueChanges = UniqueChanges + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
 		for action, changedResources := range changeSet {
+
+			result, _ := getGitDiff(action)
 			// TODO: Do not show resources shared between between unique + shared resources (only unique changes)
 			if len(changedResources) > 0 {
 				UniqueChanges = UniqueChanges + "```diff\n"
-				UniqueChanges = UniqueChanges + fmt.Sprintf("%s To %s %s\n", getGitDiff(action), action, getGitDiff(action))
+				UniqueChanges = UniqueChanges + fmt.Sprintf("%s To %s %s\n", result, action, result)
 				for _, resource := range changedResources {
 					UniqueChanges = UniqueChanges + fmt.Sprintf("~ %s\n", resource)
 				}
