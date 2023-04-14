@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: goimports
+        name: 'Run goimports'
+        alias: goimports
+        files: '^[cmd/|internal/]'
+        exclude: "pb.go"
+        types: [go]
+        language: system
+        entry: goimports -w -local github.com/u21-public/terraform-plan-analyzer

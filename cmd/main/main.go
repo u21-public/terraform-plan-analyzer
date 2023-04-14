@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	cli "github.com/urfave/cli/v2"
 	"log"
 	"os"
 
 	"github.com/u21-public/terraform-bulk-analyzer/internal/PlanAnalyzer"
+	cli "github.com/urfave/cli/v2"
 )
 
 func main() {
