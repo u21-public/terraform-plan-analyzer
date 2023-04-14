@@ -1,6 +1,6 @@
 module github.com/u21-public/terraform-bulk-analyzer
 
-go 1.19
+go 1.20
 
 require (
 	github.com/hashicorp/terraform-json v0.15.0
