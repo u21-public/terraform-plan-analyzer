@@ -2,5 +2,5 @@
 
 # Lint
 ```
-sh ./scripts/lint.sh
+make lint
 ```

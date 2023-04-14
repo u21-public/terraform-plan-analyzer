@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/u21-public/terraform-bulk-analyzer/internal/PlanAnalyzer"
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
+
+	"github.com/u21-public/terraform-bulk-analyzer/internal/PlanAnalyzer"
+	cli "github.com/urfave/cli/v2"
 )
 
 func main() {
 	app := &cli.App{
 		Name:  "Terraform Bulk Analyzer",
-		Usage: "Reads Plans -> Analayzes them -> prints report",
+		Usage: "Reads Plans -> Analyzes them -> prints report",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "tfplans",

@@ -1,14 +1,15 @@
 package PlanAnalyzer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetEmojisEmptyReturn(t *testing.T) {
 	input := map[string][]string{
-		"Create": []string{},
-		"Update": []string{},
+		"Create": {},
+		"Update": {},
 	}
 	result := getEmojis(input)
 	assert.Equal(t, result, "", "Result should be empty because changeset is empty")
@@ -16,8 +17,8 @@ func TestGetEmojisEmptyReturn(t *testing.T) {
 
 func TestGetEmojisNotEmptyReturn(t *testing.T) {
 	input := map[string][]string{
-		"Create": []string{"one", "two", "three"},
-		"Update": []string{},
+		"Create": {"one", "two", "three"},
+		"Update": {},
 	}
 	result := getEmojis(input)
 	assert.Equal(t, result, ":pencil2:", "Result should contain pencil")

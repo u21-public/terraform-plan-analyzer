@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-go vet ./...
-go install honnef.co/go/tools/cmd/staticcheck@2022.1
-GOPATH=`go env GOPATH`
-$GOPATH/bin/staticcheck ./...

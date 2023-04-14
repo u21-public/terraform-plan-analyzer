@@ -23,17 +23,17 @@ func (pa *PlanAnalyzer) ProcessPlans() {
 	fmt.Println("Comparing Workspaces...")
 
 	var hash = map[string]map[string]bool{
-		Create:  map[string]bool{},
-		Destroy: map[string]bool{},
-		Update:  map[string]bool{},
-		Replace: map[string]bool{},
+		Create:  {},
+		Destroy: {},
+		Update:  {},
+		Replace: {},
 	}
 
 	var intersection = map[string][]string{
-		Create:  []string{},
-		Destroy: []string{},
-		Update:  []string{},
-		Replace: []string{},
+		Create:  {},
+		Destroy: {},
+		Update:  {},
+		Replace: {},
 	}
 
 	// We run through all the plans and perform processing used for later
@@ -156,7 +156,7 @@ func (pa *PlanAnalyzer) GenerateReport() string {
 func NewPlanAnalyzer(plans []PlanExtended) PlanAnalyzer {
 	return PlanAnalyzer{
 		plans,
-		[][]string{[]string{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
 		map[string]map[string][]string{},
 		map[string][]string{},
 	}
