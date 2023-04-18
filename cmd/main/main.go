@@ -35,13 +35,16 @@ func main() {
 			analyzedPlans.ProcessPlans()
 			report := analyzedPlans.GenerateReport()
 
-			reporter,err := PlanAnalyzer.NewReporter(cCtx.Bool("github"), report)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+			if cCtx.Bool("github"){
+				reporter,err := PlanAnalyzer.NewGithubReporter(report)
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+				reporter.PostReport()
+			} else {
+				fmt.Println(report)
 			}
-
-			reporter.PostReport()
 
 			return nil
 		},

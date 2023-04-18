@@ -14,17 +14,13 @@ import "strings"
 type GithubReporter struct {
 	Client  *github.Client
 	Issue   string
-	Repo string
-	Owner string
+	Repo    string
+	Owner   string
+	Report  string
 }
 
-type Reporter struct {
-	githubEnabled  bool
-	GithubReporter *GithubReporter
-	Report 		   string
-}
 
-func (r *Reporter) GetReportComment(issue int) *github.IssueComment {
+func (r *GithubReporter) GetReportComment(issue int) *github.IssueComment {
 	ctx := context.Background()
 
 	opt := &github.IssueListCommentsOptions{
@@ -32,7 +28,7 @@ func (r *Reporter) GetReportComment(issue int) *github.IssueComment {
 	}
 
 	for {
-		comments, resp, err := r.GithubReporter.Client.Issues.ListComments(ctx,r.GithubReporter.Owner , r.GithubReporter.Repo,issue, opt)
+		comments, resp, err := r.Client.Issues.ListComments(ctx,r.Owner , r.Repo,issue, opt)
 		if err != nil {
 			os.Exit(1)
 		}
@@ -51,63 +47,58 @@ func (r *Reporter) GetReportComment(issue int) *github.IssueComment {
 	return nil
 }
 
-func (r *Reporter) PostReport(){
-	if(r.githubEnabled) {
-		ctx := context.Background()
-		issue, err := strconv.Atoi(r.GithubReporter.Issue)
+func (r *GithubReporter) PostReport(){
+	ctx := context.Background()
+	issue, err := strconv.Atoi(r.Issue)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	report := github.IssueComment{
+		Body: &r.Report,
+	}
+
+	reportComment := r.GetReportComment(issue)
+	if reportComment != nil {
+		id := reportComment.GetID()
+		_, _, err = r.Client.Issues.EditComment(ctx,r.Owner , r.Repo, id, &report)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-
-		report := github.IssueComment{
-			Body: &r.Report,
+	} else {
+		_, _, err = r.Client.Issues.CreateComment(ctx,r.Owner , r.Repo,issue, &report)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
 		}
-
-		reportComment := r.GetReportComment(issue)
-		if reportComment != nil {
-			id := reportComment.GetID()
-			_, _, err = r.GithubReporter.Client.Issues.EditComment(ctx,r.GithubReporter.Owner , r.GithubReporter.Repo, id, &report)
-			if err != nil {
-				fmt.Println(err.Error())
-				os.Exit(1)
-			}
-		} else {
-			_, _, err = r.GithubReporter.Client.Issues.CreateComment(ctx,r.GithubReporter.Owner , r.GithubReporter.Repo,issue, &report)
-			if err != nil {
-				fmt.Println(err.Error())
-				os.Exit(1)
-			}
-		}
-
-		fmt.Println("Posted to Github!, (Repo:", r.GithubReporter.Repo, ", Issue:", r.GithubReporter.Issue, ")")
-
-	}else {
-		fmt.Println(r.Report)
 	}
+
+	fmt.Println("Posted to Github!, (Repo:", r.Repo, ", Issue:", r.Issue, ")")
 }
 
-func NewReporter(githubEnabled bool, report string) (*Reporter, error) {
+
+func NewGithubReporter(report string) (*GithubReporter, error) {
 
 	githubToken, gtPresent := os.LookupEnv("GITHUB_TOKEN")
 	githubOwner, goPresent := os.LookupEnv("GITHUB_OWNER")
 	githubRepo, grPresent := os.LookupEnv("GITHUB_REPOSITORY")
 	githubIssue, gnPresent := os.LookupEnv("GITHUB_PR_NUMBER")
 
-	if(githubEnabled){
-		if (!gtPresent){
-			return nil, errors.New("error: GITHUB_TOKEN not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
-		}
-		if (!grPresent){
-			return nil, errors.New("error: GITHUB_REPOSITORY not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
-		}
-		if (!gnPresent){
-			return nil, errors.New("error: GITHUB_PR_NUMBER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
-		}
-		if (!goPresent) {
-			return nil, errors.New("error: GITHUB_OWNER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
-		}
+	if (!gtPresent){
+		return nil, errors.New("error: GITHUB_TOKEN not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
 	}
+	if (!grPresent){
+		return nil, errors.New("error: GITHUB_REPOSITORY not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+	}
+	if (!gnPresent){
+		return nil, errors.New("error: GITHUB_PR_NUMBER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+	}
+	if (!goPresent) {
+		return nil, errors.New("error: GITHUB_OWNER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+	}
+
 	ctx := context.Background()
 
 	ts := oauth2.StaticTokenSource(
@@ -121,11 +112,8 @@ func NewReporter(githubEnabled bool, report string) (*Reporter, error) {
 		githubIssue,
 		githubRepo,
 		githubOwner,
+		report,
 	}
 
-	return &Reporter{
-		githubEnabled,
-		githubReporter,
-		report,
-	}, nil
+	return githubReporter, nil
 }
