@@ -1,6 +1,7 @@
 package PlanAnalyzer
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -22,7 +23,7 @@ type PlanExtended struct {
 }
 
 func (p *PlanExtended) Analyze() {
-	for _, change := range p.ResourceChanges {
+	for _, change := range p.ChangeSet {
 
 		// Organize Changes into logical actions for quick
 		// look up later
@@ -97,15 +98,18 @@ func ReadPlans(plansFolderPath string) []PlanExtended {
 			fmt.Println(err)
 		}
 		defer jsonFile.Close()
-		byteValue, _ := io.ReadAll(jsonFile)
-		err_two := plan.UnmarshalJSON([]byte(byteValue))
-		if err_two != nil {
-			fmt.Println(err_two)
+		byteValue, err := io.ReadAll(jsonFile)
+		if err != nil {
+			fmt.Println(err)
+		}
+		err = json.Unmarshal(byteValue, &plan)
+		if err != nil {
+			fmt.Println(err)
 		}
 		plan.Analyze()
-		workspace, err_parse_workspace := ParseWorkspaceName(file)
-		if err_parse_workspace != nil {
-			fmt.Println(err_parse_workspace, "Arguments given: ", file)
+		workspace, err := ParseWorkspaceName(file)
+		if err != nil {
+			fmt.Println(err, "Arguments given: ", file)
 		}
 		plan.Workspace = workspace
 		plans = append(plans, plan)

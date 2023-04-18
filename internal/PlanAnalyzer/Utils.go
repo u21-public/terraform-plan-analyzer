@@ -12,6 +12,7 @@ func getEmojis(changeSet map[string][]string) string {
 	return emojis
 }
 
-func getGitDiff(action string) string {
-	return GitDiffMap[action]
+func getGitDiff(action string) (string, bool) {
+	result, exists := gitDiffMap[action]
+	return result, exists
 }
