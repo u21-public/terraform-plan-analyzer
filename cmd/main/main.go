@@ -5,8 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/u21-public/terraform-bulk-analyzer/internal/PlanAnalyzer"
 	cli "github.com/urfave/cli/v2"
+
+	"github.com/u21-public/terraform-bulk-analyzer/internal/PlanAnalyzer"
 )
 
 func main() {
