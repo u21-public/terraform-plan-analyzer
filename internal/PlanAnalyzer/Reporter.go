@@ -96,16 +96,16 @@ func NewReporter(githubEnabled bool, report string) (*Reporter, error) {
 
 	if(githubEnabled){
 		if (!gtPresent){
-			return nil, errors.New("Error: GITHUB_TOKEN not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+			return nil, errors.New("error: GITHUB_TOKEN not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
 		}
 		if (!grPresent){
-			return nil, errors.New("Error: GITHUB_REPOSITORY not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+			return nil, errors.New("error: GITHUB_REPOSITORY not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
 		}
 		if (!gnPresent){
-			return nil, errors.New("Error: GITHUB_PR_NUMBER not set. Can't initialize Github Integration! Set ENVs or disable github integration. ")
+			return nil, errors.New("error: GITHUB_PR_NUMBER not set. Can't initialize Github Integration! Set ENVs or disable github integration. ")
 		}
 		if (!goPresent) {
-			return nil, errors.New("Error: GITHUB_OWNER not set. Can't initialize Github Integration! Set ENVs or disable github integration. ")
+			return nil, errors.New("error: GITHUB_OWNER not set. Can't initialize Github Integration! Set ENVs or disable github integration. ")
 		}
 	}
 	ctx := context.Background()
