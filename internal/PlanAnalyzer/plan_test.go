@@ -1,22 +1,22 @@
 package PlanAnalyzer
 
 import (
-	"testing"
-	"fmt"
 	"errors"
+	"fmt"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
-	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestParseWorkspaceNameSuccess(t *testing.T) {
 	workspace, _ := ParseWorkspaceName("tfplan-account-region-environment.json")
-    assert.Equal(t, workspace, "account-region-environment", "Result should be account-region-environment")
+	assert.Equal(t, workspace, "account-region-environment", "Result should be account-region-environment")
 }
 
 func TestParseWorkspaceNameEmptyStringErr(t *testing.T) {
 	_, err := ParseWorkspaceName("")
-    assert.Equal(t, err, errors.New("filename given was empty string"), "Result should error out with: filename given was empty string")
+	assert.Equal(t, err, errors.New("filename given was empty string"), "Result should error out with: filename given was empty string")
 }
 
 // Can't test this case because line 78 can never be reached "if len(planNoPrefix) == 1" in plan.go
