@@ -35,27 +35,27 @@ func main() {
 			analyzedPlans.ProcessPlans()
 			report := analyzedPlans.GenerateReport()
 
-			var reporter_type string
+			var reporterType string
 			if cCtx.Bool("github") {
-				reporter_type = "github"
+				reporterType = "github"
 			} else {
-				reporter_type = "basic"
+				reporterType = "basic"
 			}
 
-			reporter, err_reporter := PlanAnalyzer.NewReporter(reporter_type, report)
-			if err_reporter != nil {
-				fmt.Println(err_reporter)
+			reporter, err_reporter := PlanAnalyzer.NewReporter(reporterType, report)
+			if errReporter != nil {
+				fmt.Println(errReporter)
 				os.Exit(1)
 			}
-			err_report := reporter.PostReport()
-			if err_report != nil {
-				fmt.Println(err_report)
+			errReport := reporter.PostReport()
+			if errReport != nil {
+				fmt.Println(errReport)
 				os.Exit(1)
 			}
 			return nil
 		},
 	}
-	if err_cli := app.Run(os.Args); err_cli != nil {
-		log.Fatal(err_cli)
+	if errCli := app.Run(os.Args); errCli != nil {
+		log.Fatal(errCli)
 	}
 }

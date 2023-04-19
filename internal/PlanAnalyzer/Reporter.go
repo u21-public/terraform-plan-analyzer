@@ -99,16 +99,16 @@ func NewReporter(reporterType string, report string) (Reporter, error) {
 		githubIssue, gnPresent := os.LookupEnv("GITHUB_PR_NUMBER")
 
 		if !gtPresent {
-			return nil, errors.New("error: GITHUB_TOKEN not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+			return nil, errors.New("error: GITHUB_TOKEN not set. Can't initialize Github Integration! Set ENVs or disable github integration")
 		}
 		if !grPresent {
-			return nil, errors.New("error: GITHUB_REPOSITORY not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+			return nil, errors.New("error: GITHUB_REPOSITORY not set. Can't initialize Github Integration! Set ENVs or disable github integration")
 		}
 		if !gnPresent {
-			return nil, errors.New("error: GITHUB_PR_NUMBER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+			return nil, errors.New("error: GITHUB_PR_NUMBER not set. Can't initialize Github Integration! Set ENVs or disable github integration")
 		}
 		if !goPresent {
-			return nil, errors.New("error: GITHUB_OWNER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
+			return nil, errors.New("error: GITHUB_OWNER not set. Can't initialize Github Integration! Set ENVs or disable github integration")
 		}
 
 		ctx := context.Background()
@@ -132,5 +132,5 @@ func NewReporter(reporterType string, report string) (Reporter, error) {
 			report,
 		}, nil
 	}
-	return nil, errors.New("Imcompatable Reporter specific. Must be github or basic.")
+	return nil, errors.New("Imcompatable Reporter specific. Must be github or basic")
 }
