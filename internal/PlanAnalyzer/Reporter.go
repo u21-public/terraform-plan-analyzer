@@ -1,13 +1,16 @@
 package PlanAnalyzer
 
-import "github.com/google/go-github/v50/github"
-import "golang.org/x/oauth2"
-import "context"
-import "os"
-import "errors"
-import "fmt"
-import "strconv"
-import "strings"
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+
+	"github.com/google/go-github/v50/github"
+	"golang.org/x/oauth2"
+)
 
 type Reporter interface {
 	PostReport() error

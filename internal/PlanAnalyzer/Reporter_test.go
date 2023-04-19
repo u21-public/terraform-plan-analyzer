@@ -2,12 +2,13 @@ package PlanAnalyzer
 
 import (
 	"errors"
-	"github.com/google/go-github/v50/github"
-	"github.com/migueleliasweb/go-github-mock/src/mock"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/google/go-github/v50/github"
+	"github.com/migueleliasweb/go-github-mock/src/mock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewReporterNoGhToken(t *testing.T) {
