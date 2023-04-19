@@ -23,8 +23,7 @@ type PlanExtended struct {
 }
 
 func (p *PlanExtended) Analyze() {
-	for _, change := range p.ChangeSet {
-
+	for _, change := range p.ResourceChanges {
 		// Organize Changes into logical actions for quick
 		// look up later
 		if change.Change.Actions.Create() {
