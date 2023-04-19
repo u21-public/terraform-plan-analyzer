@@ -39,7 +39,7 @@ func main() {
 			if cCtx.Bool("github") {
 				reporterType = "github"
 			} else {
-				reporterType = "basic"
+				reporterType = "generic"
 			}
 
 			reporter, errReporter := PlanAnalyzer.NewReporter(reporterType, report)

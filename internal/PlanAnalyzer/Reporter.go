@@ -33,6 +33,8 @@ func (r *BasicReporter) PostReport() error {
 	return nil
 }
 
+// Determines if a report already exists on a given PR, this will determine if we edit 
+// an existing comment or create a new comment
 func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, bool, error) {
 	ctx := context.Background()
 
@@ -47,6 +49,9 @@ func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, bool
 		}
 
 		for _, comment := range comments {
+			// We use the title of the report as an "id" to match against. 
+			// This breaks if multiple comments have this string, and it will only return
+			// one of those comments.
 			if strings.Contains(comment.GetBody(), "Terraform Plan Analyzer Report") {
 				return comment, true, nil
 			}
@@ -130,7 +135,8 @@ func NewReporter(reporterType string, report string) (Reporter, error) {
 			report,
 		}
 		return githubReporter, nil
-	case "basic":
+	case "generic":
+		// Generic Reporter will just post to stdout always. 
 		return &BasicReporter{
 			report,
 		}, nil
