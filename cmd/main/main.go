@@ -35,9 +35,8 @@ func main() {
 			analyzedPlans.ProcessPlans()
 			report := analyzedPlans.GenerateReport()
 
-
 			var reporter_type string
-			if cCtx.Bool("github"){
+			if cCtx.Bool("github") {
 				reporter_type = "github"
 			} else {
 				reporter_type = "basic"

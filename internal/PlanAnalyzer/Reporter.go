@@ -1,4 +1,3 @@
-
 package PlanAnalyzer
 
 import "github.com/google/go-github/v50/github"
@@ -7,24 +6,23 @@ import "context"
 import "os"
 import "errors"
 import "fmt"
-import 	"strconv"
+import "strconv"
 import "strings"
-
 
 type Reporter interface {
 	PostReport() error
 }
 
 type GithubReporter struct {
-	Client  *github.Client
-	Issue   string
-	Repo    string
-	Owner   string
-	Report  string
+	Client *github.Client
+	Issue  string
+	Repo   string
+	Owner  string
+	Report string
 }
 
 type BasicReporter struct {
-	Report  string
+	Report string
 }
 
 func (r *BasicReporter) PostReport() error {
@@ -32,8 +30,7 @@ func (r *BasicReporter) PostReport() error {
 	return nil
 }
 
-
-func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, error) {
+func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, bool, error) {
 	ctx := context.Background()
 
 	opt := &github.IssueListCommentsOptions{
@@ -41,14 +38,14 @@ func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, erro
 	}
 
 	for {
-		comments, resp, err := r.Client.Issues.ListComments(ctx,r.Owner , r.Repo,issue, opt)
+		comments, resp, err := r.Client.Issues.ListComments(ctx, r.Owner, r.Repo, issue, opt)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
-		for _,comment := range(comments) {
+		for _, comment := range comments {
 			if strings.Contains(comment.GetBody(), "Terraform Plan Analyzer Report") {
-				return comment, nil
+				return comment, true, nil
 			}
 		}
 
@@ -57,14 +54,13 @@ func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, erro
 		}
 		opt.Page = resp.NextPage
 	}
-	return nil, nil
+	return nil, false, nil
 }
 
 func (r *GithubReporter) PostReport() error {
 	ctx := context.Background()
 	issue, err := strconv.Atoi(r.Issue)
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 
@@ -72,22 +68,19 @@ func (r *GithubReporter) PostReport() error {
 		Body: &r.Report,
 	}
 
-	reportComment, err := r.GetReportComment(issue)
-	if err != nil {
-		fmt.Println(err.Error())
+	reportComment, found, err := r.GetReportComment(issue)
+	if err != nil && !found {
 		return err
 	}
 	if reportComment != nil {
 		id := reportComment.GetID()
-		_, _, err = r.Client.Issues.EditComment(ctx,r.Owner , r.Repo, id, &report)
+		_, _, err = r.Client.Issues.EditComment(ctx, r.Owner, r.Repo, id, &report)
 		if err != nil {
-			fmt.Println(err.Error())
 			return err
 		}
 	} else {
-		_, _, err = r.Client.Issues.CreateComment(ctx,r.Owner , r.Repo,issue, &report)
+		_, _, err = r.Client.Issues.CreateComment(ctx, r.Owner, r.Repo, issue, &report)
 		if err != nil {
-			fmt.Println(err.Error())
 			return err
 		}
 	}
@@ -95,9 +88,6 @@ func (r *GithubReporter) PostReport() error {
 	fmt.Println("Posted to Github!, (Repo:", r.Repo, ", Issue:", r.Issue, ")")
 	return nil
 }
-
-
-
 
 func NewReporter(reporterType string, report string) (Reporter, error) {
 
@@ -107,29 +97,29 @@ func NewReporter(reporterType string, report string) (Reporter, error) {
 		githubOwner, goPresent := os.LookupEnv("GITHUB_OWNER")
 		githubRepo, grPresent := os.LookupEnv("GITHUB_REPOSITORY")
 		githubIssue, gnPresent := os.LookupEnv("GITHUB_PR_NUMBER")
-	
-		if (!gtPresent){
+
+		if !gtPresent {
 			return nil, errors.New("error: GITHUB_TOKEN not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
 		}
-		if (!grPresent){
+		if !grPresent {
 			return nil, errors.New("error: GITHUB_REPOSITORY not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
 		}
-		if (!gnPresent){
+		if !gnPresent {
 			return nil, errors.New("error: GITHUB_PR_NUMBER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
 		}
-		if (!goPresent) {
+		if !goPresent {
 			return nil, errors.New("error: GITHUB_OWNER not set. Can't initialize Github Integration! Set ENVs or disable github integration.")
 		}
-	
+
 		ctx := context.Background()
-	
+
 		ts := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: githubToken},
 		)
 		tc := oauth2.NewClient(ctx, ts)
 		client := github.NewClient(tc)
-		
-		githubReporter := &GithubReporter {
+
+		githubReporter := &GithubReporter{
 			client,
 			githubIssue,
 			githubRepo,
