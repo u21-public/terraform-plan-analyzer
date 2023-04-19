@@ -1,6 +1,6 @@
 module github.com/u21-public/terraform-bulk-analyzer
 
-go 1.19
+go 1.20
 
 require (
 	github.com/google/go-github/v50 v50.2.0
