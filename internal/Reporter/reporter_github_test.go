@@ -25,8 +25,8 @@ func TestGetReportCommentNoComments(t *testing.T) {
 		"report",
 	}
 
-	_, found, _ := githubReporter.GetReportComment(1)
-	assert.Equal(t, false, found, "Wrong")
+	reporter, _ := githubReporter.GetReportComment(1)
+	assert.Nilf(t, reporter, "reporter should be nil")
 }
 
 func TestGetReportCommentListCommentError(t *testing.T) {
@@ -52,7 +52,7 @@ func TestGetReportCommentListCommentError(t *testing.T) {
 		"report",
 	}
 
-	_, _, err := githubReporter.GetReportComment(1)
+	_, err := githubReporter.GetReportComment(1)
 	assert.Equal(t, err.(*github.ErrorResponse).Message, failMessage)
 }
 
@@ -76,8 +76,7 @@ func TestGetReportCommentListOnePage(t *testing.T) {
 		"report",
 	}
 
-	issue, found, _ := githubReporter.GetReportComment(1)
-	assert.Equal(t, true, found, "Wrong")
+	issue, _ := githubReporter.GetReportComment(1)
 	assert.Equal(t, "Terraform Plan Analyzer Report", *issue.Body)
 }
 
@@ -110,8 +109,7 @@ func TestGetReportCommentListTwoPages(t *testing.T) {
 		"report",
 	}
 
-	issue, found, _ := githubReporter.GetReportComment(1)
-	assert.Equal(t, true, found, "Wrong")
+	issue, _ := githubReporter.GetReportComment(1)
 	assert.Equal(t, "Terraform Plan Analyzer Report", *issue.Body)
 	assert.Equal(t, *github.Int64(123), *issue.ID)
 

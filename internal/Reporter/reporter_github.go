@@ -23,7 +23,7 @@ type GithubReporter struct {
 
 // Determines if a report already exists on a given PR, this will determine if we edit
 // an existing comment or create a new comment
-func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, bool, error) {
+func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, error) {
 	ctx := context.Background()
 
 	opt := &github.IssueListCommentsOptions{
@@ -33,7 +33,7 @@ func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, bool
 	for {
 		comments, resp, err := r.Client.Issues.ListComments(ctx, r.Owner, r.Repo, issue, opt)
 		if err != nil {
-			return nil, false, err
+			return nil, err
 		}
 
 		for _, comment := range comments {
@@ -41,7 +41,7 @@ func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, bool
 			// This breaks if multiple comments have this string, and it will only return
 			// one of those comments.
 			if strings.Contains(comment.GetBody(), "Terraform Plan Analyzer Report") {
-				return comment, true, nil
+				return comment, nil
 			}
 		}
 
@@ -50,7 +50,7 @@ func (r *GithubReporter) GetReportComment(issue int) (*github.IssueComment, bool
 		}
 		opt.Page = resp.NextPage
 	}
-	return nil, false, nil
+	return nil, nil
 }
 
 func (r *GithubReporter) PostReport() error {
@@ -64,8 +64,8 @@ func (r *GithubReporter) PostReport() error {
 		Body: &r.Report,
 	}
 
-	reportComment, found, err := r.GetReportComment(issue)
-	if err != nil && !found {
+	reportComment, err := r.GetReportComment(issue)
+	if err != nil {
 		return err
 	}
 	if reportComment != nil {
