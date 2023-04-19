@@ -143,7 +143,7 @@ func (pa *PlanAnalyzer) GenerateUniqueResources() string {
 func (pa *PlanAnalyzer) GenerateReport() string {
 	var report string
 
-	reportTitle := fmt.Sprintf("# %s Terraform Plan Analyzer Report!Variable string %s\n", EmojiMap["title"], EmojiMap["title"])
+	reportTitle := fmt.Sprintf("# %s Terraform Plan Analyzer Report! %s\n", EmojiMap["title"], EmojiMap["title"])
 	lastUpdated := pa.GenerateLastUpdated()
 	markdownTable := pa.GenerateComparisonTable()
 	sharedResources := pa.GenerateSharedResources()
