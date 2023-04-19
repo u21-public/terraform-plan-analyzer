@@ -8,6 +8,7 @@ import (
 	cli "github.com/urfave/cli/v2"
 
 	"github.com/u21-public/terraform-bulk-analyzer/internal/PlanAnalyzer"
+	"github.com/u21-public/terraform-bulk-analyzer/internal/Reporter"
 )
 
 func main() {
@@ -42,14 +43,13 @@ func main() {
 				reporterType = "generic"
 			}
 
-			reporter, errReporter := PlanAnalyzer.NewReporter(reporterType, report)
-			if errReporter != nil {
-				fmt.Println(errReporter)
+			reporter, err := Reporter.NewReporter(reporterType, report)
+			if err != nil {
+				fmt.Println(err)
 				os.Exit(1)
 			}
-			errReport := reporter.PostReport()
-			if errReport != nil {
-				fmt.Println(errReport)
+			if err = reporter.PostReport(); err != nil {
+				fmt.Println(err)
 				os.Exit(1)
 			}
 			return nil
