@@ -42,7 +42,7 @@ func main() {
 				reporterType = "basic"
 			}
 
-			reporter, err_reporter := PlanAnalyzer.NewReporter(reporterType, report)
+			reporter, errReporter := PlanAnalyzer.NewReporter(reporterType, report)
 			if errReporter != nil {
 				fmt.Println(errReporter)
 				os.Exit(1)
