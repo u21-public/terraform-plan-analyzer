@@ -14,8 +14,8 @@ import (
 type ReporterType = string
 
 const (
-	GithubReporterType  ReporterType = "github"
-	BasicReporterType ReporterType = "basic"
+	GithubReporterType ReporterType = "github"
+	BasicReporterType  ReporterType = "basic"
 )
 
 type Reporter interface {
