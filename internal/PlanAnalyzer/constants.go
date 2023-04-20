@@ -21,5 +21,5 @@ var gitDiffMap = map[string]string{
 	Create:  "+",
 	Destroy: "-",
 	Update:  "!",
-	Replace: "~",
+	Replace: "-",
 }

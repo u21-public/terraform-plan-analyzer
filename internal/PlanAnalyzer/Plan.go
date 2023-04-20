@@ -23,8 +23,7 @@ type PlanExtended struct {
 }
 
 func (p *PlanExtended) Analyze() {
-	for _, change := range p.ChangeSet {
-
+	for _, change := range p.ResourceChanges {
 		// Organize Changes into logical actions for quick
 		// look up later
 		if change.Change.Actions.Create() {
@@ -57,6 +56,9 @@ func (p *PlanExtended) getActions() map[string][]string {
 func FilePathWalkDir(root string) ([]string, error) {
 	var files []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if !info.IsDir() {
 			files = append(files, path)
 		}
