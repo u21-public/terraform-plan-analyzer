@@ -98,46 +98,84 @@ func (pa *PlanAnalyzer) GenerateComparisonTable() string {
 func (pa *PlanAnalyzer) GenerateSharedResources() string {
 	var sharedResources string
 
-	sharedResources = sharedResources + "## All Workspaces" + getEmojis(pa.SharedChanges) + "\n"
-	for action, changedResources := range pa.SharedChanges {
+	sharedResourceTitle := "## All Workspaces" + getEmojis(pa.SharedChanges) + "\n"
+	sharedResources = sharedResourceTitle
+	for _, action := range SupportedAction {
 
-		result, _ := getGitDiff(action)
-		// Open Code block
-		sharedResources = sharedResources + "```diff\n"
-		sharedResources = sharedResources + fmt.Sprintf("%s To %s %s\n", result, action, result)
-		for _, resource := range changedResources {
-			sharedResources = sharedResources + fmt.Sprintf("~ %s\n", resource)
+		changedResources := pa.SharedChanges[action]
+		if len(changedResources) > 0 {
+			result, _ := getGitDiff(action)
+			// Open Code block
+			sharedResources = sharedResources + "```diff\n"
+			sharedResources = sharedResources + fmt.Sprintf("%s To %s %s\n", result, action, result)
+			for _, resource := range changedResources {
+				sharedResources = sharedResources + fmt.Sprintf("~ %s\n", resource)
+			}
+			// Close Code block
+			sharedResources = sharedResources + "```\n\n"
 		}
-		// Close Code block
-		sharedResources = sharedResources + "```\n\n"
+	}
+
+	// Only occurs if no shared resources exist, so dont both just returning title
+	if sharedResources == sharedResourceTitle {
+		return ""
 	}
 
 	return sharedResources
 }
 
 func (pa *PlanAnalyzer) GenerateUniqueResources() string {
-	var UniqueChanges string
+	var uniqueChanges string
 
-	UniqueChanges = UniqueChanges + "## Individual Workspaces\n"
+	uniqueChangesTitle := "## Individual Workspaces\n"
+	uniqueChanges = uniqueChanges + uniqueChangesTitle
 
-	for workspace, changeSet := range pa.UniqueChanges {
-		UniqueChanges = UniqueChanges + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
-		for action, changedResources := range changeSet {
+	sortedWorkspaces := GetSortedWorkspaces(pa.UniqueChanges)
+	for _, workspace := range sortedWorkspaces {
+		uniqueChanges = uniqueChanges + pa.GenerateWorkspaceUniqueResources(workspace, pa.UniqueChanges[workspace])
+	}
 
-			result, _ := getGitDiff(action)
-			// TODO: Do not show resources shared between between unique + shared resources (only unique changes)
-			if len(changedResources) > 0 {
-				UniqueChanges = UniqueChanges + "```diff\n"
-				UniqueChanges = UniqueChanges + fmt.Sprintf("%s To %s %s\n", result, action, result)
-				for _, resource := range changedResources {
-					UniqueChanges = UniqueChanges + fmt.Sprintf("~ %s\n", resource)
+	if uniqueChanges == uniqueChangesTitle {
+		return ""
+	}
+	return uniqueChanges
+}
+
+func (pa *PlanAnalyzer) GenerateWorkspaceUniqueResources(workspace string, changeSet map[string][]string) string {
+	var uniqueChanges string
+	resourceCount := 0
+
+	uniqueChanges = uniqueChanges + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
+	for _, action := range SupportedAction {
+		changedResources := changeSet[action]
+		result, _ := getGitDiff(action)
+
+		if len(changedResources) > 0 {
+			uniqueChanges = uniqueChanges + "```diff\n"
+			uniqueChanges = uniqueChanges + fmt.Sprintf("%s To %s %s\n", result, action, result)
+			for _, resource := range changedResources {
+				if pa.IsChangeUnique(action, resource) {
+					uniqueChanges = uniqueChanges + fmt.Sprintf("~ %s\n", resource)
+					resourceCount = resourceCount + 1
 				}
-				UniqueChanges = UniqueChanges + "```\n\n"
 			}
+			uniqueChanges = uniqueChanges + "```\n\n"
 		}
 	}
 
-	return UniqueChanges
+	if resourceCount == 0 {
+		return ""
+	}
+	return uniqueChanges
+}
+
+func (pa *PlanAnalyzer) IsChangeUnique(action string, resource string) bool {
+	for _, sharedResource := range pa.SharedChanges[action] {
+		if resource == sharedResource {
+			return false
+		}
+	}
+	return true
 }
 
 func (pa *PlanAnalyzer) GenerateReport() string {
