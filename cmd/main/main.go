@@ -38,9 +38,9 @@ func main() {
 
 			var reporterType string
 			if cCtx.Bool("github") {
-				reporterType = "github"
+				reporterType = Reporter.GithubReporterType
 			} else {
-				reporterType = "generic"
+				reporterType = Reporter.BasicReporterType
 			}
 
 			reporter, err := Reporter.NewReporter(reporterType, report)

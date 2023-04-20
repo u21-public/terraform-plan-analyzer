@@ -15,7 +15,7 @@ type ReporterType = string
 
 const (
 	GithubReporterType  ReporterType = "github"
-	GenericReporterType ReporterType = "generic"
+	BasicReporterType ReporterType = "basic"
 )
 
 type Reporter interface {
@@ -69,7 +69,7 @@ func NewReporter(reporterType string, report string) (Reporter, error) {
 			report,
 		}
 		return githubReporter, nil
-	case GenericReporterType:
+	case BasicReporterType:
 		// Generic Reporter will just post to stdout always.
 		return &BasicReporter{
 			report,
