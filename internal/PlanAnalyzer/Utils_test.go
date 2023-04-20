@@ -54,6 +54,6 @@ func TestGetSortedWorkspaces(t *testing.T) {
 	}
 
 	var expected = []string{"aworkspace", "workspace1", "workspace3", "workspace4"}
-	result := GetSortedWorkspaces(planAnalyzer.UniqueChanges)
+	result := GetSortedWorkspaces(planAnalyzer.Changes)
 	assert.Equal(t, expected, result)
 }

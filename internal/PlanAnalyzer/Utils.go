@@ -7,6 +7,7 @@ import (
 func getEmojis(changeSet map[string][]string) string {
 	emojis := ""
 
+	// Ensure we parse actions in same order every time
 	for _, action := range SupportedAction {
 		resources := changeSet[action]
 		if len(resources) > 0 {
@@ -21,6 +22,8 @@ func getGitDiff(action string) (string, bool) {
 	return result, exists
 }
 
+// Returns a list of keys in sorted order. This is so we can process workspaces in
+// alphabetic order
 func GetSortedWorkspaces(workspaceChangeSet map[string]map[string][]string) []string {
 	sortedWorkspaces := make([]string, len(workspaceChangeSet))
 
