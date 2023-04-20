@@ -12,7 +12,7 @@ type PlanAnalyzer struct {
 
 	// { <workspace>: {<action>: <resource>}}
 	// ex: { prod1: { "ToUpdate": "resource1"}}
-	UniqueChanges map[string]map[string][]string
+	Changes map[string]map[string][]string
 
 	// { <action>: <resource>}
 	// ex: { "ToUpdate: "resource1", "ToDestroy": "resource2" }
@@ -47,11 +47,11 @@ func (pa *PlanAnalyzer) ProcessPlans() {
 			strconv.Itoa(len(plan.ToDestroy)),
 			strconv.Itoa(len(plan.ToReplace)),
 		})
-		pa.UniqueChanges[plan.Workspace] = plan.getActions()
+		pa.Changes[plan.Workspace] = plan.getActions()
 
 		// Hash intersection for quick slice comparison
 		for _, action := range SupportedAction {
-			for _, address := range pa.UniqueChanges[plan.Workspace][action] {
+			for _, address := range pa.Changes[plan.Workspace][action] {
 				if i == 0 {
 					hash[action][address] = true
 				} else {
@@ -100,9 +100,11 @@ func (pa *PlanAnalyzer) GenerateSharedResources() string {
 
 	sharedResourceTitle := "## All Workspaces" + getEmojis(pa.SharedChanges) + "\n"
 	sharedResources = sharedResourceTitle
-	for _, action := range SupportedAction {
 
+	// Process Actions in same order every time
+	for _, action := range SupportedAction {
 		changedResources := pa.SharedChanges[action]
+
 		if len(changedResources) > 0 {
 			result, _ := getGitDiff(action)
 			// Open Code block
@@ -116,7 +118,7 @@ func (pa *PlanAnalyzer) GenerateSharedResources() string {
 		}
 	}
 
-	// Only occurs if no shared resources exist, so dont both just returning title
+	// Only occurs if no shared resources exist, in which case we want to print nothing
 	if sharedResources == sharedResourceTitle {
 		return ""
 	}
@@ -124,49 +126,55 @@ func (pa *PlanAnalyzer) GenerateSharedResources() string {
 	return sharedResources
 }
 
-func (pa *PlanAnalyzer) GenerateUniqueResources() string {
-	var uniqueChanges string
+func (pa *PlanAnalyzer) GenerateResources() string {
+	var Changes string
 
-	uniqueChangesTitle := "## Individual Workspaces\n"
-	uniqueChanges = uniqueChanges + uniqueChangesTitle
+	ChangesTitle := "## Individual Workspaces\n"
+	Changes = Changes + ChangesTitle
 
-	sortedWorkspaces := GetSortedWorkspaces(pa.UniqueChanges)
+	// Ensure we process workspaces in alphabetic order
+	sortedWorkspaces := GetSortedWorkspaces(pa.Changes)
 	for _, workspace := range sortedWorkspaces {
-		uniqueChanges = uniqueChanges + pa.GenerateWorkspaceUniqueResources(workspace, pa.UniqueChanges[workspace])
+		Changes = Changes + pa.GenerateWorkspaceResources(workspace, pa.Changes[workspace])
 	}
 
-	if uniqueChanges == uniqueChangesTitle {
+	// Only occurs if no unique resources exist, in which case we want to print nothing
+	if Changes == ChangesTitle {
 		return ""
 	}
-	return uniqueChanges
+	return Changes
 }
 
-func (pa *PlanAnalyzer) GenerateWorkspaceUniqueResources(workspace string, changeSet map[string][]string) string {
-	var uniqueChanges string
+func (pa *PlanAnalyzer) GenerateWorkspaceResources(workspace string, changeSet map[string][]string) string {
+	var Changes string
+
+	// Due to filtering out shared changes as we go along, we use a count
+	// to determine if any unique changes even exist
 	resourceCount := 0
 
-	uniqueChanges = uniqueChanges + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
+	Changes = Changes + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
 	for _, action := range SupportedAction {
 		changedResources := changeSet[action]
 		result, _ := getGitDiff(action)
 
 		if len(changedResources) > 0 {
-			uniqueChanges = uniqueChanges + "```diff\n"
-			uniqueChanges = uniqueChanges + fmt.Sprintf("%s To %s %s\n", result, action, result)
+			Changes = Changes + "```diff\n"
+			Changes = Changes + fmt.Sprintf("%s To %s %s\n", result, action, result)
 			for _, resource := range changedResources {
 				if pa.IsChangeUnique(action, resource) {
-					uniqueChanges = uniqueChanges + fmt.Sprintf("~ %s\n", resource)
+					Changes = Changes + fmt.Sprintf("~ %s\n", resource)
 					resourceCount = resourceCount + 1
 				}
 			}
-			uniqueChanges = uniqueChanges + "```\n\n"
+			Changes = Changes + "```\n\n"
 		}
 	}
 
+	// Only occurs if zero unique resources were detected, in which case print nothing
 	if resourceCount == 0 {
 		return ""
 	}
-	return uniqueChanges
+	return Changes
 }
 
 func (pa *PlanAnalyzer) IsChangeUnique(action string, resource string) bool {
@@ -185,9 +193,9 @@ func (pa *PlanAnalyzer) GenerateReport() string {
 	lastUpdated := pa.GenerateLastUpdated()
 	markdownTable := pa.GenerateComparisonTable()
 	sharedResources := pa.GenerateSharedResources()
-	UniqueChanges := pa.GenerateUniqueResources()
+	Changes := pa.GenerateResources()
 
-	report = reportTitle + lastUpdated + markdownTable + sharedResources + UniqueChanges
+	report = reportTitle + lastUpdated + markdownTable + sharedResources + Changes
 	return report
 }
 
