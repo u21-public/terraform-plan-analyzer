@@ -16,7 +16,6 @@ func TestGenerateSharedResourcesEmpty(t *testing.T) {
 
 	result := planAnalyzer.GenerateSharedResources()
 	assert.Equal(t, "", result)
-
 }
 
 func TestGenerateSharedResourcesNoResources(t *testing.T) {
@@ -30,7 +29,6 @@ func TestGenerateSharedResourcesNoResources(t *testing.T) {
 	expected := ""
 	result := planAnalyzer.GenerateSharedResources()
 	assert.Equal(t, expected, result)
-
 }
 
 func TestGenerateSharedResourcesNotEmpty(t *testing.T) {
@@ -44,10 +42,9 @@ func TestGenerateSharedResourcesNotEmpty(t *testing.T) {
 	expected := "## All Workspaces:pencil2:\n```diff\n+ To Create +\n~ resource1\n```\n\n"
 	result := planAnalyzer.GenerateSharedResources()
 	assert.Equal(t, expected, result)
-
 }
 
-func TestGenerateResourcesNoUnique(t *testing.T) {
+func TestgenerateResourcesNoUnique(t *testing.T) {
 	var changeSet = map[string][]string{
 		Create: {"resource1"},
 	}
@@ -61,11 +58,11 @@ func TestGenerateResourcesNoUnique(t *testing.T) {
 		changeSet,
 	}
 
-	result := planAnalyzer.GenerateResources()
+	result := planAnalyzer.generateResources()
 	assert.Equal(t, "", result)
 }
 
-func TestGenerateResourcesSomeUnique(t *testing.T) {
+func TestgenerateResourcesSomeUnique(t *testing.T) {
 	var changeSet = map[string][]string{
 		Create:  {"resource1"},
 		Destroy: {"resource2"},
@@ -83,11 +80,11 @@ func TestGenerateResourcesSomeUnique(t *testing.T) {
 	// Line is to long, so split it up
 	expected := "## Individual Workspaces\n### workspace1 :pencil2::wastebasket:\n"
 	expected = expected + "```diff\n+ To Create +\n```\n\n```diff\n- To Destroy -\n~ resource2\n```\n\n"
-	result := planAnalyzer.GenerateResources()
+	result := planAnalyzer.generateResources()
 	assert.Equal(t, expected, result)
 }
 
-func TestGenerateResourcesMultipleWorkspaces(t *testing.T) {
+func TestgenerateResourcesMultipleWorkspaces(t *testing.T) {
 	var changeSet = map[string][]string{
 		Create:  {"resource1"},
 		Destroy: {"resource2"},
@@ -107,7 +104,7 @@ func TestGenerateResourcesMultipleWorkspaces(t *testing.T) {
 	expected := "## Individual Workspaces\n### workspace1 :pencil2::wastebasket:\n"
 	expected = expected + "```diff\n+ To Create +\n```\n\n```diff\n- To Destroy -\n~ resource2\n```\n\n"
 	expected = expected + "### workspace2 :pencil2::wastebasket:\n```diff\n+ To Create +\n```\n\n```diff\n- To Destroy -\n~ resource2\n```\n\n"
-	result := planAnalyzer.GenerateResources()
+	result := planAnalyzer.generateResources()
 	assert.Equal(t, expected, result)
 }
 

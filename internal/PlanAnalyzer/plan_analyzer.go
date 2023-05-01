@@ -15,7 +15,7 @@ type PlanAnalyzer struct {
 	Changes map[string]map[string][]string
 
 	// { <action>: <resource>}
-	// ex: { "ToUpdate: "resource1", "ToDestroy": "resource2" }
+	// ex: { "ToUpdate: ["resource1", "resource2"], "ToDestroy": ["resource2"] }
 	SharedChanges map[string][]string
 }
 
@@ -80,17 +80,17 @@ func (pa *PlanAnalyzer) GenerateComparisonTable() string {
 
 	for row := range pa.ComparisonTable {
 		for column := range pa.ComparisonTable[row] {
-			markdownTable = markdownTable + "| "
-			markdownTable = markdownTable + pa.ComparisonTable[row][column] + " "
+			markdownTable += "| "
+			markdownTable += pa.ComparisonTable[row][column] + " "
 		}
-		markdownTable = markdownTable + "|"
-		markdownTable = markdownTable + "\n"
+		markdownTable += "|"
+		markdownTable += "\n"
 
 		if row == 0 {
-			markdownTable = markdownTable + "|-|:-:|:-:|:-:|:-:|\n"
+			markdownTable += "|-|:-:|:-:|:-:|:-:|\n"
 		}
 	}
-	markdownTable = markdownTable + "\n\n"
+	markdownTable += "\n\n"
 
 	return markdownTable
 }
@@ -108,13 +108,13 @@ func (pa *PlanAnalyzer) GenerateSharedResources() string {
 		if len(changedResources) > 0 {
 			result, _ := getGitDiff(action)
 			// Open Code block
-			sharedResources = sharedResources + "```diff\n"
-			sharedResources = sharedResources + fmt.Sprintf("%s To %s %s\n", result, action, result)
+			sharedResources += "```diff\n"
+			sharedResources += fmt.Sprintf("%s To %s %s\n", result, action, result)
 			for _, resource := range changedResources {
-				sharedResources = sharedResources + fmt.Sprintf("~ %s\n", resource)
+				sharedResources += fmt.Sprintf("~ %s\n", resource)
 			}
 			// Close Code block
-			sharedResources = sharedResources + "```\n\n"
+			sharedResources += "```\n\n"
 		}
 	}
 
@@ -174,7 +174,7 @@ func (pa *PlanAnalyzer) GenerateWorkspaceResources(workspace string, changeSet m
 	if resourceCount == 0 {
 		return ""
 	}
-	return Changes
+	return changes
 }
 
 func (pa *PlanAnalyzer) IsChangeUnique(action string, resource string) bool {
@@ -193,9 +193,9 @@ func (pa *PlanAnalyzer) GenerateReport() string {
 	lastUpdated := pa.GenerateLastUpdated()
 	markdownTable := pa.GenerateComparisonTable()
 	sharedResources := pa.GenerateSharedResources()
-	Changes := pa.GenerateResources()
+	changes := pa.generateResources()
 
-	report = reportTitle + lastUpdated + markdownTable + sharedResources + Changes
+	report = reportTitle + lastUpdated + markdownTable + sharedResources + changes
 	return report
 }
 
