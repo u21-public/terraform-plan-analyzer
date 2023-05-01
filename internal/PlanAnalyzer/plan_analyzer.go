@@ -126,47 +126,47 @@ func (pa *PlanAnalyzer) GenerateSharedResources() string {
 	return sharedResources
 }
 
-func (pa *PlanAnalyzer) GenerateResources() string {
-	var Changes string
+func (pa *PlanAnalyzer) generateResources() string {
+	var changes string
 
-	ChangesTitle := "## Individual Workspaces\n"
-	Changes = Changes + ChangesTitle
+	changesTitle := "## Individual Workspaces\n"
+	changes += changesTitle
 
 	// Ensure we process workspaces in alphabetic order
-	sortedWorkspaces := GetSortedWorkspaces(pa.Changes)
+	sortedWorkspaces := getSortedWorkspaces(pa.Changes)
 	for _, workspace := range sortedWorkspaces {
-		Changes = Changes + pa.GenerateWorkspaceResources(workspace, pa.Changes[workspace])
+		changes += pa.GenerateWorkspaceResources(workspace, pa.Changes[workspace])
 	}
 
 	// Only occurs if no unique resources exist, in which case we want to print nothing
-	if Changes == ChangesTitle {
+	if changes == changesTitle {
 		return ""
 	}
-	return Changes
+	return changes
 }
 
 func (pa *PlanAnalyzer) GenerateWorkspaceResources(workspace string, changeSet map[string][]string) string {
-	var Changes string
+	var changes string
 
 	// Due to filtering out shared changes as we go along, we use a count
 	// to determine if any unique changes even exist
 	resourceCount := 0
 
-	Changes = Changes + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
+	changes = changes + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
 	for _, action := range SupportedAction {
 		changedResources := changeSet[action]
 		result, _ := getGitDiff(action)
 
 		if len(changedResources) > 0 {
-			Changes = Changes + "```diff\n"
-			Changes = Changes + fmt.Sprintf("%s To %s %s\n", result, action, result)
+			changes += "```diff\n"
+			changes += fmt.Sprintf("%s To %s %s\n", result, action, result)
 			for _, resource := range changedResources {
 				if pa.IsChangeUnique(action, resource) {
-					Changes = Changes + fmt.Sprintf("~ %s\n", resource)
+					changes += fmt.Sprintf("~ %s\n", resource)
 					resourceCount = resourceCount + 1
 				}
 			}
-			Changes = Changes + "```\n\n"
+			changes += "```\n\n"
 		}
 	}
 

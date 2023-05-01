@@ -24,7 +24,7 @@ func getGitDiff(action string) (string, bool) {
 
 // Returns a list of keys in sorted order. This is so we can process workspaces in
 // alphabetic order
-func GetSortedWorkspaces(workspaceChangeSet map[string]map[string][]string) []string {
+func getSortedWorkspaces(workspaceChangeSet map[string]map[string][]string) []string {
 	sortedWorkspaces := make([]string, len(workspaceChangeSet))
 
 	i := 0
