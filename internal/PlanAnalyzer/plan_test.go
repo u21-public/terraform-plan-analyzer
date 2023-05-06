@@ -15,23 +15,18 @@ func TestParseWorkspaceNameSuccess(t *testing.T) {
 	assert.Equal(t, workspace, "account-region-environment", "Result should be account-region-environment")
 }
 
-func TestParseWorkspaceNameEmptyStringErr(t *testing.T) {
+func TestParseWorkspaceNameEmptyString(t *testing.T) {
 	_, err := ParseWorkspaceName("")
 	assert.Equal(t, err, errors.New("filename given was empty string"), "Result should error out with: filename given was empty string")
 }
 
-// Can't test this case because line 78 can never be reached "if len(planNoPrefix) == 1" in plan.go
-// func TestParseWorkspaceNameNoPrefixErr(t *testing.T) {
-// 	_, err := ParseWorkspaceName("account-us-west-2-prod1.json")
-//     assert.Equal(
-// 		t,
-// 		err,
-// 		errors.New("plan filename must be prefixed with tfplan-"),
-// 		"Result should error out with: plan filename must be prefixed with tfplan-"
-// 	)
-// }
+func TestParseWorkspaceNameNoPrefix(t *testing.T) {
+	_, err := ParseWorkspaceName("account-us-west-2-prod1.json")
+	assert.Equal(t, err, errors.New("plan filename must be prefixed with tfplan-"), "Result should error out with: plan filename must be prefixed with tfplan-")
+}
 
 func TestFilePathWalkDirSuccess(t *testing.T) {
+	// Mock os.FileInfo
 	var expectedFilesList []string
 	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {

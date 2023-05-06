@@ -68,19 +68,26 @@ func FilePathWalkDir(root string) ([]string, error) {
 }
 
 func ParseWorkspaceName(planFileName string) (string, error) {
+	var planNoPrefix string
+
 	planBaseName := filepath.Base(planFileName)
 
 	if planBaseName == "." {
 		return "", errors.New("filename given was empty string")
 	}
 
-	planNoExt := strings.Split(planBaseName, ".json")[0]
-	planNoPrefix := strings.Split(planNoExt, "tfplan-")[1]
+	planBaseNameSplit := strings.Split(planBaseName, ".json")
+	if len(planBaseNameSplit) > 0 {
+		planNoExt := planBaseNameSplit[0]
+		planNoPrefixSplit := strings.Split(planNoExt, "tfplan-")
 
-	if len(planNoPrefix) == 1 {
-		return "", errors.New("plan filename must be prefixed with tfplan-")
+		if len(planNoPrefixSplit) > 1 {
+			planNoPrefix = planNoPrefixSplit[1]
+			_ = planNoPrefix
+		} else {
+			return "", errors.New("plan filename must be prefixed with tfplan-")
+		}
 	}
-
 	return planNoPrefix, nil
 }
 
