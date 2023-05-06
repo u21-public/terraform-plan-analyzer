@@ -2,7 +2,7 @@ package PlanAnalyzer
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,41 +22,64 @@ func TestParseWorkspaceNameEmptyString(t *testing.T) {
 
 func TestParseWorkspaceNameNoPrefix(t *testing.T) {
 	_, err := ParseWorkspaceName("account-us-west-2-prod1.json")
-	assert.Equal(t, err, errors.New("plan filename must be prefixed with tfplan-"), "Result should error out with: plan filename must be prefixed with tfplan-")
+	assert.Equal(t, err, errors.New("plan filename must be prefixed with tfplan-"),
+		"Result should error out with: plan filename must be prefixed with tfplan-")
 }
 
 func TestFilePathWalkDirSuccess(t *testing.T) {
-	// Mock os.FileInfo
-	var expectedFilesList []string
-	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			expectedFilesList = append(expectedFilesList, path)
-		}
-		return nil
-	})
-	if err != nil {
-		fmt.Println("Error with iterating current directory")
+	directory, _ := os.MkdirTemp("", "sampledir")
+	_, err1 := os.CreateTemp(directory, "file1.tf")
+	_, err2 := os.CreateTemp(directory, "file2.tf")
+	if err1 != nil || err2 != nil {
+		log.Fatal("Error occurred while creating temporarily files in directory")
 	}
-
-	result, _ := FilePathWalkDir(".")
-	assert.Equal(t, result, expectedFilesList, "Result should contain all file names in current directory")
+	filesFound, _ := FilePathWalkDir(directory)
+	assert.Equal(t, len(filesFound), 2, "Result should be equivalent to 2")
 }
 
-// How to test for error path here? maybe we need better error handling
-// func TestFilePathWalkDirError(t *testing.T) {
-// 	// expected_files_list := []string{}
-//     // files, _ := ioutil.ReadDir(".")
-//     // for _, file := range files {
-//     //     expected_files_list= append(expected_files_list, file.Name())
-//     // }
+func TestFilePathWalkDirEmptyDir(t *testing.T) {
+	directory, _ := os.MkdirTemp("", "sampledir")
+	filesFound, _ := FilePathWalkDir(directory)
+	assert.Equal(t, len(filesFound), 0, "Result should be equivalent to 2")
+}
 
-// 	result, _ := FilePathWalkDir("/")
-// 	fmt.Println(result)
-// 	// assert.Equal(t, result, expected_files_list, "Result should contain all file names in current directory")
-// }
+func TestFilePathWalkInvalidDir(t *testing.T) {
+	_, err := FilePathWalkDir("/random_invalid_path")
+	assert.Contains(t, err.Error(), "no such file or directory")
+}
 
-// func TestReadPlansSuccess(t *testing.T) {
-// 	result := ReadPlans("test_data/tfplan-account-region-environment.json")
-// 	fmt.Println(result[0])
-// 	fmt.Println([]PlanExtended(result))
-// }
+func TestFileFoldersInsideFolders(t *testing.T) {
+	directory, _ := os.MkdirTemp("", "first_dir")
+	secondaryDir, _ := os.MkdirTemp(directory, "second_dir")
+	_, err := os.CreateTemp(secondaryDir, "file1.tf")
+	if err != nil {
+		log.Fatal("Error occurred while creating temporarily files in directory")
+	}
+	filesFound, _ := FilePathWalkDir(directory)
+	assert.Equal(t, len(filesFound), 1, "Result should be equivalent to 1")
+}
+
+func TestReadPlansEmptyDir(t *testing.T) {
+	directory, _ := os.MkdirTemp("", "test_dir")
+	plansList := ReadPlans(directory)
+	assert.Equal(t, len(plansList), 0, "Plans list should return 0")
+}
+
+func TestReadPlansSuccess(t *testing.T) {
+	directory, _ := os.MkdirTemp("", "test_dir")
+	destinationFile, err := os.CreateTemp(directory, "tfplan-file1.tf")
+	if err != nil {
+		log.Fatal("Error occurred while creating temporarily files in directory")
+	}
+	absPath, _ := filepath.Abs("../../examples/plans_json/basic_example/tfplan-example1-only-creates.json")
+	input, _ := os.ReadFile(absPath)
+	writeErr := os.WriteFile(destinationFile.Name(), input, 0644)
+	if writeErr != nil {
+		log.Fatal("Error occurred while writing files to destination file")
+	}
+
+	plansList := ReadPlans(directory)
+	toCreate := plansList[0].ToCreate
+
+	assert.Equal(t, len(toCreate), 3, "Plan should create 3 S3 example buckets")
+}
