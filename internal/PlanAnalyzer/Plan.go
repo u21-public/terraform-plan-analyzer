@@ -3,8 +3,8 @@ package PlanAnalyzer
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,31 +94,31 @@ func ParseWorkspaceName(planFileName string) (string, error) {
 func ReadPlans(plansFolderPath string) []PlanExtended {
 	var plans []PlanExtended
 
-	fmt.Println("Reading the plans in...`", plansFolderPath, "`")
+	log.Println("Reading the plans in...`", plansFolderPath, "`")
 	files, err := FilePathWalkDir(plansFolderPath)
 	if err != nil {
-		fmt.Println(err, "Arguments passed: ", plansFolderPath)
+		log.Println(err, "Arguments passed: ", plansFolderPath)
 		os.Exit(1)
 	}
 	for _, file := range files {
 		plan := PlanExtended{}
 		jsonFile, err := os.Open(file)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		defer jsonFile.Close()
 		byteValue, err := io.ReadAll(jsonFile)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		err = json.Unmarshal(byteValue, &plan)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		plan.Analyze()
 		workspace, err := ParseWorkspaceName(file)
 		if err != nil {
-			fmt.Println(err, "Arguments given: ", file)
+			log.Println(err, "Arguments given: ", file)
 		}
 		plan.Workspace = workspace
 		plans = append(plans, plan)

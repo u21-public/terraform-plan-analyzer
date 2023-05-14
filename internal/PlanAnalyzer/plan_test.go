@@ -1,6 +1,7 @@
 package PlanAnalyzer
 
 import (
+	"bytes"
 	"errors"
 	"log"
 	"os"
@@ -27,7 +28,7 @@ func TestParseWorkspaceNameNoPrefix(t *testing.T) {
 }
 
 func TestFilePathWalkDirSuccess(t *testing.T) {
-	directory, _ := os.MkdirTemp("", "sampledir")
+	directory := t.TempDir()
 	_, err1 := os.CreateTemp(directory, "file1.tf")
 	_, err2 := os.CreateTemp(directory, "file2.tf")
 	if err1 != nil || err2 != nil {
@@ -38,9 +39,9 @@ func TestFilePathWalkDirSuccess(t *testing.T) {
 }
 
 func TestFilePathWalkDirEmptyDir(t *testing.T) {
-	directory, _ := os.MkdirTemp("", "sampledir")
+	directory := t.TempDir()
 	filesFound, _ := FilePathWalkDir(directory)
-	assert.Equal(t, len(filesFound), 0, "Result should be equivalent to 2")
+	assert.Equal(t, len(filesFound), 0, "Result should be equivalent to 0")
 }
 
 func TestFilePathWalkInvalidDir(t *testing.T) {
@@ -60,13 +61,13 @@ func TestFileFoldersInsideFolders(t *testing.T) {
 }
 
 func TestReadPlansEmptyDir(t *testing.T) {
-	directory, _ := os.MkdirTemp("", "test_dir")
+	directory := t.TempDir()
 	plansList := ReadPlans(directory)
 	assert.Equal(t, len(plansList), 0, "Plans list should return 0")
 }
 
 func TestReadPlansSuccess(t *testing.T) {
-	directory, _ := os.MkdirTemp("", "test_dir")
+	directory := t.TempDir()
 	destinationFile, err := os.CreateTemp(directory, "tfplan-file1.tf")
 	if err != nil {
 		log.Fatal("Error occurred while creating temporarily files in directory")
@@ -82,4 +83,21 @@ func TestReadPlansSuccess(t *testing.T) {
 	toCreate := plansList[0].ToCreate
 
 	assert.Equal(t, len(toCreate), 3, "Plan should create 3 S3 example buckets")
+}
+
+func TestReadPlansInvalidWorkspaceName(t *testing.T) {
+	directory := t.TempDir()
+	_, err := os.CreateTemp(directory, "account-us-west-2-prod1.json")
+	if err != nil {
+		log.Fatal("Error occurred while creating temporarily files in directory")
+	}
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+	ReadPlans(directory)
+
+	assert.Contains(t, buf.String(), "plan filename must be prefixed with tfplan-")
 }
