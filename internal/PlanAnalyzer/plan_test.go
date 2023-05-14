@@ -101,3 +101,22 @@ func TestReadPlansInvalidWorkspaceName(t *testing.T) {
 
 	assert.Contains(t, buf.String(), "plan filename must be prefixed with tfplan-")
 }
+
+func TestAnalyzeDestroyPath(t *testing.T) {
+	directory := t.TempDir()
+	destinationFile, err := os.CreateTemp(directory, "tfplan-file1.tf")
+	if err != nil {
+		log.Fatal("Error occurred while creating temporarily files in directory")
+	}
+	absPath, _ := filepath.Abs("../../examples/plans_json/basic_example/tfplan-example3-destroy.json")
+	input, _ := os.ReadFile(absPath)
+	writeErr := os.WriteFile(destinationFile.Name(), input, 0644)
+	if writeErr != nil {
+		log.Fatal("Error occurred while writing files to destination file")
+	}
+
+	plansList := ReadPlans(directory)
+	ToDestroy := plansList[0].ToDestroy
+
+	assert.Equal(t, len(ToDestroy), 1, "Plan should destroy one example bucket")
+}
