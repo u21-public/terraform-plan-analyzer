@@ -97,8 +97,7 @@ func ReadPlans(plansFolderPath string) []PlanExtended {
 	log.Println("Reading the plans in...`", plansFolderPath, "`")
 	files, err := FilePathWalkDir(plansFolderPath)
 	if err != nil {
-		log.Println(err, "Arguments passed: ", plansFolderPath)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	for _, file := range files {
 		plan := PlanExtended{}

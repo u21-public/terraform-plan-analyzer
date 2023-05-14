@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -119,4 +120,20 @@ func TestAnalyzeDestroyPath(t *testing.T) {
 	ToDestroy := plansList[0].ToDestroy
 
 	assert.Equal(t, len(ToDestroy), 1, "Plan should destroy one example bucket")
+}
+
+func TestReadPlansInexistentDir(t *testing.T) {
+	fakeDirPath := "fake_directory"
+	if os.Getenv("EXIT_ONE") == "1" {
+		ReadPlans(fakeDirPath)
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestReadPlansInexistentDir")
+	cmd.Env = append(os.Environ(), "EXIT_ONE=1")
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+		return
+	}
+	t.Fatalf("process ran with err %v, want exit status 1", err)
 }
