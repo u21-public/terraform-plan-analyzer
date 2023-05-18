@@ -3,8 +3,8 @@ package PlanAnalyzer
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -68,50 +68,56 @@ func FilePathWalkDir(root string) ([]string, error) {
 }
 
 func ParseWorkspaceName(planFileName string) (string, error) {
+	var planNoPrefix string
+
 	planBaseName := filepath.Base(planFileName)
 
 	if planBaseName == "." {
 		return "", errors.New("filename given was empty string")
 	}
 
-	planNoExt := strings.Split(planBaseName, ".json")[0]
-	planNoPrefix := strings.Split(planNoExt, "tfplan-")[1]
+	planBaseNameSplit := strings.Split(planBaseName, ".json")
+	if len(planBaseNameSplit) > 0 {
+		planNoExt := planBaseNameSplit[0]
+		planNoPrefixSplit := strings.Split(planNoExt, "tfplan-")
 
-	if len(planNoPrefix) == 1 {
-		return "", errors.New("plan filename must be prefixed with tfplan-")
+		if len(planNoPrefixSplit) > 1 {
+			planNoPrefix = planNoPrefixSplit[1]
+			_ = planNoPrefix
+		} else {
+			return "", errors.New("plan filename must be prefixed with tfplan-")
+		}
 	}
-
 	return planNoPrefix, nil
 }
 
 func ReadPlans(plansFolderPath string) []PlanExtended {
 	var plans []PlanExtended
 
-	fmt.Println("Reading the plans in...`", plansFolderPath, "`")
+	log.Println("Reading the plans in...`", plansFolderPath, "`")
 	files, err := FilePathWalkDir(plansFolderPath)
 	if err != nil {
-		fmt.Println(err, "Arguments passed: ", plansFolderPath)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	for _, file := range files {
 		plan := PlanExtended{}
 		jsonFile, err := os.Open(file)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		defer jsonFile.Close()
 		byteValue, err := io.ReadAll(jsonFile)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		err = json.Unmarshal(byteValue, &plan)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		plan.Analyze()
 		workspace, err := ParseWorkspaceName(file)
 		if err != nil {
-			fmt.Println(err, "Arguments given: ", file)
+			log.Println(err, "Arguments given: ", file)
 		}
 		plan.Workspace = workspace
 		plans = append(plans, plan)
