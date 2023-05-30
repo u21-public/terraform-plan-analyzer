@@ -36,7 +36,7 @@ func TestGetGitDiffNoMatch(t *testing.T) {
 	assert.Equal(t, exists, false, "The exists boolean should be false because key is not a match")
 }
 
-func TestgetSortedWorkspaces(t *testing.T) {
+func TestGetSortedWorkspaces(t *testing.T) {
 	var changeSet = map[string][]string{
 		"create": {"resource1"},
 	}

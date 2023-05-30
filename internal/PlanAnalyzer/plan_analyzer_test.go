@@ -44,7 +44,7 @@ func TestGenerateSharedResourcesNotEmpty(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func TestgenerateResourcesNoUnique(t *testing.T) {
+func TestGenerateResourcesNoUnique(t *testing.T) {
 	var changeSet = map[string][]string{
 		Create: {"resource1"},
 	}
@@ -62,7 +62,7 @@ func TestgenerateResourcesNoUnique(t *testing.T) {
 	assert.Equal(t, "", result)
 }
 
-func TestgenerateResourcesSomeUnique(t *testing.T) {
+func TestGenerateResourcesSomeUnique(t *testing.T) {
 	var changeSet = map[string][]string{
 		Create:  {"resource1"},
 		Destroy: {"resource2"},
@@ -84,7 +84,7 @@ func TestgenerateResourcesSomeUnique(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func TestgenerateResourcesMultipleWorkspaces(t *testing.T) {
+func TestGenerateResourcesMultipleWorkspaces(t *testing.T) {
 	var changeSet = map[string][]string{
 		Create:  {"resource1"},
 		Destroy: {"resource2"},
