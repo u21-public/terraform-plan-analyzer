@@ -51,6 +51,10 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: debug
+        shell: bash
+        run: |
+          ls -la
       - uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
