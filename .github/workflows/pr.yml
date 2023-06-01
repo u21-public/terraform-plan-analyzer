@@ -49,3 +49,10 @@ jobs:
         with:
           name: tf-plan-analyzer
           path: cmd/main/build/tf-plan-analyzer
+      - uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
