@@ -8,8 +8,8 @@ before:
 dockers:
 - dockerfile: Dockerfile
   image_templates:
-    - ghcr.io/u21-public/tf-plan-analyzer:{{ .Version }}
-    - ghcr.io/u21-public/tf-plan-analyzer:latest
+    - ghcr.io/u21-public/terraform-plan-analyzer:{{ .Version }}
+    - ghcr.io/u21-public/terraform-plan-analyzer:latest
   build_flag_templates:
     - "--label=org.opencontainers.image.created={{ .Date }}"
     - "--label=org.opencontainers.image.title={{ .ProjectName }}"
