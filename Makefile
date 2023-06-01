@@ -32,4 +32,4 @@ test: tidy
 .PHONY: build
 build: tidy
 	@echo "Building binary..."
-	go build -o ./bin/${BIN_NAME} ${SRC_ROOT}/cmd/main.go
+	go build -o ./bin/${BIN_NAME} main.go

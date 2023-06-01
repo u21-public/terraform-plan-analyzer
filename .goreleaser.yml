@@ -10,7 +10,6 @@ builds:
       # usage by users in CI/CD systems like Terraform Cloud where
       # they are unable to install libraries.
       - CGO_ENABLED=0
-    main: cmd/main
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
