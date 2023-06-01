@@ -12,10 +12,10 @@ type PlanAnalyzer struct {
 
 	// { <workspace>: {<action>: <resource>}}
 	// ex: { prod1: { "ToUpdate": "resource1"}}
-	UniqueChanges map[string]map[string][]string
+	Changes map[string]map[string][]string
 
 	// { <action>: <resource>}
-	// ex: { "ToUpdate: "resource1", "ToDestroy": "resource2" }
+	// ex: { "ToUpdate: ["resource1", "resource2"], "ToDestroy": ["resource2"] }
 	SharedChanges map[string][]string
 }
 
@@ -47,11 +47,11 @@ func (pa *PlanAnalyzer) ProcessPlans() {
 			strconv.Itoa(len(plan.ToDestroy)),
 			strconv.Itoa(len(plan.ToReplace)),
 		})
-		pa.UniqueChanges[plan.Workspace] = plan.getActions()
+		pa.Changes[plan.Workspace] = plan.getActions()
 
 		// Hash intersection for quick slice comparison
 		for _, action := range SupportedAction {
-			for _, address := range pa.UniqueChanges[plan.Workspace][action] {
+			for _, address := range pa.Changes[plan.Workspace][action] {
 				if i == 0 {
 					hash[action][address] = true
 				} else {
@@ -80,17 +80,17 @@ func (pa *PlanAnalyzer) GenerateComparisonTable() string {
 
 	for row := range pa.ComparisonTable {
 		for column := range pa.ComparisonTable[row] {
-			markdownTable = markdownTable + "| "
-			markdownTable = markdownTable + pa.ComparisonTable[row][column] + " "
+			markdownTable += "| "
+			markdownTable += pa.ComparisonTable[row][column] + " "
 		}
-		markdownTable = markdownTable + "|"
-		markdownTable = markdownTable + "\n"
+		markdownTable += "|"
+		markdownTable += "\n"
 
 		if row == 0 {
-			markdownTable = markdownTable + "|-|:-:|:-:|:-:|:-:|\n"
+			markdownTable += "|-|:-:|:-:|:-:|:-:|\n"
 		}
 	}
-	markdownTable = markdownTable + "\n\n"
+	markdownTable += "\n\n"
 
 	return markdownTable
 }
@@ -98,46 +98,92 @@ func (pa *PlanAnalyzer) GenerateComparisonTable() string {
 func (pa *PlanAnalyzer) GenerateSharedResources() string {
 	var sharedResources string
 
-	sharedResources = sharedResources + "## All Workspaces" + getEmojis(pa.SharedChanges) + "\n"
-	for action, changedResources := range pa.SharedChanges {
+	sharedResourceTitle := "## All Workspaces" + getEmojis(pa.SharedChanges) + "\n"
+	sharedResources = sharedResourceTitle
 
-		result, _ := getGitDiff(action)
-		// Open Code block
-		sharedResources = sharedResources + "```diff\n"
-		sharedResources = sharedResources + fmt.Sprintf("%s To %s %s\n", result, action, result)
-		for _, resource := range changedResources {
-			sharedResources = sharedResources + fmt.Sprintf("~ %s\n", resource)
+	// Process Actions in same order every time
+	for _, action := range SupportedAction {
+		changedResources := pa.SharedChanges[action]
+
+		if len(changedResources) > 0 {
+			result, _ := getGitDiff(action)
+			// Open Code block
+			sharedResources += "```diff\n"
+			sharedResources += fmt.Sprintf("%s To %s %s\n", result, action, result)
+			for _, resource := range changedResources {
+				sharedResources += fmt.Sprintf("~ %s\n", resource)
+			}
+			// Close Code block
+			sharedResources += "```\n\n"
 		}
-		// Close Code block
-		sharedResources = sharedResources + "```\n\n"
+	}
+
+	// Only occurs if no shared resources exist, in which case we want to print nothing
+	if sharedResources == sharedResourceTitle {
+		return ""
 	}
 
 	return sharedResources
 }
 
-func (pa *PlanAnalyzer) GenerateUniqueResources() string {
-	var UniqueChanges string
+func (pa *PlanAnalyzer) generateResources() string {
+	var changes string
 
-	UniqueChanges = UniqueChanges + "## Individual Workspaces\n"
+	changesTitle := "## Individual Workspaces\n"
+	changes += changesTitle
 
-	for workspace, changeSet := range pa.UniqueChanges {
-		UniqueChanges = UniqueChanges + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
-		for action, changedResources := range changeSet {
+	// Ensure we process workspaces in alphabetic order
+	sortedWorkspaces := getSortedWorkspaces(pa.Changes)
+	for _, workspace := range sortedWorkspaces {
+		changes += pa.GenerateWorkspaceResources(workspace, pa.Changes[workspace])
+	}
 
-			result, _ := getGitDiff(action)
-			// TODO: Do not show resources shared between between unique + shared resources (only unique changes)
-			if len(changedResources) > 0 {
-				UniqueChanges = UniqueChanges + "```diff\n"
-				UniqueChanges = UniqueChanges + fmt.Sprintf("%s To %s %s\n", result, action, result)
-				for _, resource := range changedResources {
-					UniqueChanges = UniqueChanges + fmt.Sprintf("~ %s\n", resource)
+	// Only occurs if no unique resources exist, in which case we want to print nothing
+	if changes == changesTitle {
+		return ""
+	}
+	return changes
+}
+
+func (pa *PlanAnalyzer) GenerateWorkspaceResources(workspace string, changeSet map[string][]string) string {
+	var changes string
+
+	// Due to filtering out shared changes as we go along, we use a count
+	// to determine if any unique changes even exist
+	resourceCount := 0
+
+	changes = changes + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
+	for _, action := range SupportedAction {
+		changedResources := changeSet[action]
+		result, _ := getGitDiff(action)
+
+		if len(changedResources) > 0 {
+			changes += "```diff\n"
+			changes += fmt.Sprintf("%s To %s %s\n", result, action, result)
+			for _, resource := range changedResources {
+				if pa.IsChangeUnique(action, resource) {
+					changes += fmt.Sprintf("~ %s\n", resource)
+					resourceCount = resourceCount + 1
 				}
-				UniqueChanges = UniqueChanges + "```\n\n"
 			}
+			changes += "```\n\n"
 		}
 	}
 
-	return UniqueChanges
+	// Only occurs if zero unique resources were detected, in which case print nothing
+	if resourceCount == 0 {
+		return ""
+	}
+	return changes
+}
+
+func (pa *PlanAnalyzer) IsChangeUnique(action string, resource string) bool {
+	for _, sharedResource := range pa.SharedChanges[action] {
+		if resource == sharedResource {
+			return false
+		}
+	}
+	return true
 }
 
 func (pa *PlanAnalyzer) GenerateReport() string {
@@ -147,9 +193,9 @@ func (pa *PlanAnalyzer) GenerateReport() string {
 	lastUpdated := pa.GenerateLastUpdated()
 	markdownTable := pa.GenerateComparisonTable()
 	sharedResources := pa.GenerateSharedResources()
-	UniqueChanges := pa.GenerateUniqueResources()
+	changes := pa.generateResources()
 
-	report = reportTitle + lastUpdated + markdownTable + sharedResources + UniqueChanges
+	report = reportTitle + lastUpdated + markdownTable + sharedResources + changes
 	return report
 }
 
