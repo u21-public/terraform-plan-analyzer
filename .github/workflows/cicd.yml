@@ -11,6 +11,10 @@ env:
   GO_VERSION: '1.20'
   GO_LINT_VERSION: v1.51.2
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
