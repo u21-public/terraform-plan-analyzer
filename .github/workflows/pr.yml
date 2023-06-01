@@ -46,11 +46,6 @@ jobs:
         shell: bash
         run: |
           go build -o build/tf-plan-analyzer
-      - name: Archive cli
-        uses: actions/upload-artifact@v3
-        with:
-          name: tf-plan-analyzer
-          path: cmd/main/build/tf-plan-analyzer
       - uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
