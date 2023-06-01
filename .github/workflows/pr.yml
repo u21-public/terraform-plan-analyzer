@@ -48,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: tf-plan-analyzer
-          path: cmd/main/build/tf-plan-anlyzer
+          path: cmd/main/build/tf-plan-analyzer
