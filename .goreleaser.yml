@@ -4,13 +4,30 @@ before:
   hooks:
     # this is just an example and not a requirement for provider building/publishing
     - go mod tidy
+
+dockers:
+- dockerfile: Dockerfile
+  image_templates:
+    - ghcr.io/u21-public/terraform-plan-analyzer:{{ .Version }}
+    - ghcr.io/u21-public/terraform-plan-analyzer:latest
+  build_flag_templates:
+    - "--label=org.opencontainers.image.created={{ .Date }}"
+    - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+    - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+    - "--label=org.opencontainers.image.version={{ .Version }}"
+    - "--platform=linux/amd64"
+    - "--target=goreleaser"
+    - "--pull"
+  goos: linux
+  goarch: amd64
+  goamd64: v1
+  use: buildx
 builds:
   - env:
       # goreleaser does not work with CGO, it could also complicate
       # usage by users in CI/CD systems like Terraform Cloud where
       # they are unable to install libraries.
       - CGO_ENABLED=0
-    main: cmd/main
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
@@ -18,7 +35,6 @@ builds:
       - '-s -w -X main.version={{.Version}}'
     goos:
 #      - freebsd
-      - windows
       - linux
       - darwin
     goarch:
@@ -29,9 +45,7 @@ builds:
     ignore:
       - goos: darwin
         goarch: '386'
-      - goos: windows
-        goarch: '386'
-    binary: 'tf-plan-analyzer'
+    binary: 'terraform-plan-analyzer'
 archives:
   - format: zip
     name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
