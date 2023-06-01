@@ -17,5 +17,5 @@ RUN go build -a -o /${PROJECT} .
 
 ### Scratch with build in docker
 FROM scratch as goreleaser
-COPY --from=builder /tf-plan-analyzer /bin/
+COPY terraform-plan-analyzer /bin/
 ENTRYPOINT ["/bin/tf-plan-analyzer"]
