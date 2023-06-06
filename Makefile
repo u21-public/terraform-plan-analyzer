@@ -7,6 +7,7 @@ setup:
 	@test -x "$(which pre-commit)" || pip install pre-commit
 	@pre-commit install
 	@pre-commit install-hooks
+	
 
 .PHONY: fmt
 fmt:
