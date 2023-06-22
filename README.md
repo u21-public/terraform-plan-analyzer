@@ -23,20 +23,21 @@ GLOBAL OPTIONS:
    --help, -h       show help
 2023/06/22 12:38:27 Required flag "tfplans" not set
 ```
+
+<img src=".github/imgs/rendered-bulk.png" width="700">
+
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Why?](#why)
+- [Design](#design)
 - [Usage](#usage)
   - [Binary](#binary)
   - [Docker](#docker)
   - [Github Actions](#github-actions)
-  - [Github Actions](#github-actions-1)
 - [Rendered Examples](#rendered-examples)
-  - [Only unique changes](#only-unique-changes)
-  - [Only shared changes](#only-shared-changes)
-  - [Some shared some unique](#some-shared-some-unique)
 - [Local Development](#local-development)
   - [Pre-requisites](#pre-requisites)
   - [Commands](#commands)
@@ -50,13 +51,16 @@ GLOBAL OPTIONS:
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Why?
-Simply put, once you are deploying to large amount of workspaces, reviewing all changes made by a terraform PR becomes incredibly time consuming. It is not resonable to review every single plan for every PR (espically for huge changesets) as it takes forever and it is very easy to miss changes the more of them you have to review.
+Simply put, once you are deploying to large amount of workspaces, reviewing all changes made by a terraform PR becomes incredibly time consuming. It is not reasonable to review every single plan for every PR (especially for huge changesets) as it takes forever and it is very easy to miss changes the more of them you have to review.
 
-In an ideal world, drift doesn't exist either, however this is not the reality for a lot of projects. It is easy for a single workspace to drift away from the others, and you accidently deploy a change you did not want.
+In an ideal world, drift doesn't exist either, however this is not the reality for a lot of projects. It is easy for a single workspace to drift away from the others, and you accidentally deploy a change you did not want.
 
 With the above context, this project was created to...
-1) Given high level summary of all changes in a readable format
+1) Give high level summary of all changes in a readable format
 2) Quickly discern if all workspaces have the same change, or if any have drift compared to the others. 
+
+# Design
+<img src=".github/imgs/terraform-plan-analyzer-diagram.png" width="700">
 
 # Usage 
 ## Binary
@@ -180,13 +184,13 @@ Last Updated: `2023-06-22 18:25:15.707233069 +0000 UTC m=+0.079645794`
 ```
 
 # Rendered Examples
-** Only unique changes **
+**Only unique changes**  
 <img src=".github/imgs/rendered-pr-example.png" width="700">
 
-** Only shared changes **
+**Only shared changes**  
 <img src=".github/imgs/rendered-shared-example.png" width="700">
 
-** Some shared some unique **
+**Some shared some unique**  
 <img src=".github/imgs/rendered-some-shared-example.png" width="700">
 
 # Local Development
