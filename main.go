@@ -13,7 +13,7 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name:  "Terraform Bulk Analyzer",
+		Name:  "Terraform Plan Analyzer",
 		Usage: "Reads Plans -> Analyzes them -> prints report",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
