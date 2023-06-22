@@ -1,4 +1,4 @@
-package Reporter
+package reporter
 
 import (
 	"context"
