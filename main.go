@@ -7,8 +7,8 @@ import (
 
 	cli "github.com/urfave/cli/v2"
 
-	"github.com/u21-public/terraform-bulk-analyzer/internal/PlanAnalyzer"
-	"github.com/u21-public/terraform-bulk-analyzer/internal/Reporter"
+	"github.com/u21-public/terraform-bulk-analyzer/internal/plananalyzer"
+	"github.com/u21-public/terraform-bulk-analyzer/internal/reporter"
 )
 
 func main() {
@@ -31,19 +31,19 @@ func main() {
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
-			plans := PlanAnalyzer.ReadPlans(cCtx.String("tfplans"))
-			analyzedPlans := PlanAnalyzer.NewPlanAnalyzer(plans)
+			plans := plananalyzer.ReadPlans(cCtx.String("tfplans"))
+			analyzedPlans := plananalyzer.NewPlanAnalyzer(plans)
 			analyzedPlans.ProcessPlans()
 			report := analyzedPlans.GenerateReport()
 
 			var reporterType string
 			if cCtx.Bool("github") {
-				reporterType = Reporter.GithubReporterType
+				reporterType = reporter.GithubReporterType
 			} else {
-				reporterType = Reporter.BasicReporterType
+				reporterType = reporter.BasicReporterType
 			}
 
-			reporter, err := Reporter.NewReporter(reporterType, report)
+			reporter, err := reporter.NewReporter(reporterType, report)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)

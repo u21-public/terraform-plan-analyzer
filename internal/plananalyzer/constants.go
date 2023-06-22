@@ -1,4 +1,4 @@
-package PlanAnalyzer
+package plananalyzer
 
 const (
 	Create  = "Create"
