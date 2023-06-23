@@ -7,6 +7,10 @@ inputs:
   gh_token:
     type: string
     required: true
+  version:
+    type: string
+    required: false
+    default: "0.5.0"
 runs:
   using: composite
   steps:
@@ -29,9 +33,10 @@ runs:
         GITHUB_OWNER: ${{ github.repository_owner	}}
         GITHUB_REPOSITORY: ${{ github.event.repository.name }}
         GITHUB_PR_NUMBER: ${{ steps.get-pr-number.outputs.pr_number }}
+        VERSION: ${{ inputs.version }}
       run: |
         docker run \
           -v "$(pwd)/tfplans/:/tfplans" \
           -e GITHUB_TOKEN -e GITHUB_REPOSITORY -e GITHUB_OWNER -e GITHUB_PR_NUMBER \
-          ghcr.io/u21-public/terraform-plan-analyzer:0.5.0 \
+          ghcr.io/u21-public/terraform-plan-analyzer:${{ env.VERSION }} \
           --tfplans /tfplans --github
