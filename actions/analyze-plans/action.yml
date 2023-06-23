@@ -30,7 +30,7 @@ runs:
         GITHUB_PR_NUMBER: ${{ steps.get-pr-number.outputs.pr_number }}
       run: |
         docker run \
-          -v ./tfplans/:/tfplans \
+          -v "$(pwd)/tfplans/:/tfplans" \
           -e GITHUB_TOKEN -e GITHUB_REPO -e GITHUB_PR_NUMBER \
-          ghcr.io/u21-public/terraform-plan-analyzer:0.4.0 \
+          ghcr.io/u21-public/terraform-plan-analyzer:0.5.0 \
           --tfplans /tfplans --github
