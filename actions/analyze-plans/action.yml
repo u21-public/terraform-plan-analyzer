@@ -26,7 +26,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
-        GITHUB_REPO: ${{ env.GITHUB_REPOSITORY }}
+        GITHUB_REPO: ${{ github.repository }}
         GITHUB_PR_NUMBER: ${{ steps.get-pr-number.outputs.pr_number }}
       run: |
         docker run \
