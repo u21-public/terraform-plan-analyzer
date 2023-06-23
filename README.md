@@ -157,30 +157,27 @@ Last Updated: `2023-06-22 18:25:15.707233069 +0000 UTC m=+0.079645794`
           terraform show -json tfplan-${{ matrix.workspace }} > tfplan-${{ matrix.workspace }}.json
         shell: bash
       - name: Archive Plans
-        uses: actions/upload-artifact@v3
+        uses: u21-public/terraform-plan-analyzer/actions/archive-plans@v0.6.0
         with:
-          name: tfplans
-          path: |
-            tfplan-{{ matrix.workspace }}.json
+          plan_name: "tfplan-${{ matrix-planname }}"
 ```
 2) Unarchieve plans and analyze them 
 ```
   analyze-plans:
-    runs-on: ubuntu-latest
-    needs:[run-service-plan]
+    needs: [run-service-plan]
+    if: |
+      always()
+    runs-on: ${{ inputs.runner }}
+    name: Analyze Plans
     steps:
-      - name: download plans
-        uses: actions/download-artifact@v3
+      - name: Confirm Passing plans
+        if: ${{ needs.run-service-plan.result != 'success' }}
+        run: exit 1
+      - name: Analyze Terraform Plans
+        uses: u21-public/terraform-plan-analyzer/actions/analyze-plans@v0.6.0
         with:
-          name: tfplans
-          path: tfplans
-      - name: Run Analyzer
-        shell: bash
-        run:|
-          docker run \
-            -v ./examples/:/examples \
-            ghcr.io/u21-public/terraform-plan-analyzer:0.4.0 \
-            --tfplans /examples/plans_json/basic_example
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          version: "0.6.0"
 ```
 
 # Rendered Examples

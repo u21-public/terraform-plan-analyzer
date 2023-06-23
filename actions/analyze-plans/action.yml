@@ -31,12 +31,12 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
         GITHUB_OWNER: ${{ github.repository_owner }}
-        GITHUB_REPOSITORY: ${{ github.event.repository.name }}
+        GITHUB_REPO: ${{ github.event.repository.name }}
         GITHUB_PR_NUMBER: ${{ steps.get-pr-number.outputs.pr_number }}
         VERSION: ${{ inputs.version }}
       run: |
         docker run \
           -v "$(pwd)/tfplans/:/tfplans" \
-          -e GITHUB_TOKEN -e GITHUB_REPOSITORY -e GITHUB_OWNER -e GITHUB_PR_NUMBER \
+          -e GITHUB_TOKEN -e GITHUB_OWNER -e GITHUB_PR_NUMBER --env GITHUB_REPOSITORY=${{ env.GITHUB_REPO }}\
           ghcr.io/u21-public/terraform-plan-analyzer:${{ env.VERSION }} \
           --tfplans /tfplans --github
