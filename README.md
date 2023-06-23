@@ -174,10 +174,9 @@ Last Updated: `2023-06-22 18:25:15.707233069 +0000 UTC m=+0.079645794`
         if: ${{ needs.run-service-plan.result != 'success' }}
         run: exit 1
       - name: Analyze Terraform Plans
-        uses: u21/terraform-plan-analyzer/actions/analyze-plans@v1.2.0
         uses: u21-public/terraform-plan-analyzer/actions/analyze-plans@v0.6.0
         with:
-          gh_token: ${{ secrets.GH_ACTIONS_ACCESS_TOKEN }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           version: "0.6.0"
 ```
 
