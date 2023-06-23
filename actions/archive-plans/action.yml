@@ -22,7 +22,6 @@ runs:
     - name: Convert terraform plan to human-readable stdout
       run: |
         cd ${{ inputs.path_to_terraform_root }}
-        terraform-bin show ${{ inputs.plan_name }} > ${{ inputs.plan_name }}-stdout
       shell: bash
     - name: Cache terraform plan stdout and json
       uses: actions/upload-artifact@v3
@@ -30,4 +29,3 @@ runs:
         name: ${{ inputs.plan_archive_id }}
         path: | 
           ${{ inputs.path_to_terraform_root }}/${{ inputs.plan_name }}.json
-          ${{ inputs.path_to_terraform_root }}/${{ inputs.plan_name }}-stdout
