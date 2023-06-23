@@ -1,0 +1,36 @@
+name: Analyze Plans
+description: Unstashes plans and runs report on them
+inputs:
+  plan_archive_id:
+    type: string
+    default: tfplan
+  gh_token:
+    type: string
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Download Plans
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.plan_archive_id }}
+        path: tfplans
+    - name: get PR info
+      id: get-pr-number
+      run: |
+        PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+        echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Run and Post Report
+      id: run-report
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+        GITHUB_REPO: ${{ env.GITHUB_REPOSITORY }}
+        GITHUB_PR_NUMBER: ${{ steps.get-pr-number.outputs.pr_number }}
+      run: |
+        docker run \
+          -v ./tfplans/:/tfplans \
+          -e GITHUB_TOKEN -e GITHUB_REPO -e GITHUB_PR_NUMBER \
+          ghcr.io/u21-public/terraform-plan-analyzer:0.4.0 \
+          --tfplans /tfplans --github
