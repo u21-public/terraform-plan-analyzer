@@ -1,5 +1,5 @@
 # Terraform Plan Analyzer
-[![Release](https://github.com/u21-public/terraform-plan-analyzer/actions/workflows/cicd.yml/badge.svg)
+[![Release](https://github.com/u21-public/terraform-plan-analyzer/actions/workflows/cicd.yml/badge.svg)](https://github.com/u21-public/terraform-plan-analyzer/actions/workflows/cicd.yml)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/u21-public/terraform-plan-analyzer)
 [![](https://img.shields.io/badge/License-MIT%202.0-blue.svg)](https://github.com/u21-public/terraform-plan-analyzer/blob/master/LICENSE)
 
