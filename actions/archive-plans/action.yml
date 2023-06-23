@@ -1,0 +1,33 @@
+name: Archive Plans
+description: Convert plan to json and archive
+inputs:
+  path_to_terraform_root:
+    required: false
+    type: string
+    default: .
+  plan_archive_id:
+    type: string
+    default: tfplan
+  plan_name:
+    type:
+    required: true 
+runs:
+  using: composite
+  steps:
+    - name: Convert Terraform Plan in JSON
+      run: |
+        cd ${{ inputs.path_to_terraform_root }}
+        terraform-bin show -json ${{ inputs.plan_name }} > ${{ inputs.plan_name }}.json
+      shell: bash
+    - name: Convert terraform plan to human-readable stdout
+      run: |
+        cd ${{ inputs.path_to_terraform_root }}
+        terraform-bin show ${{ inputs.plan_name }} > ${{ inputs.plan_name }}-stdout
+      shell: bash
+    - name: Cache terraform plan stdout and json
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.plan_archive_id }}
+        path: | 
+          ${{ inputs.path_to_terraform_root }}/${{ inputs.plan_name }}.json
+          ${{ inputs.path_to_terraform_root }}/${{ inputs.plan_name }}-stdout
