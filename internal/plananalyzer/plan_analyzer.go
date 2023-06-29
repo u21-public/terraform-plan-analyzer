@@ -200,9 +200,14 @@ func (pa *PlanAnalyzer) GenerateReport() string {
 }
 
 func NewPlanAnalyzer(plans []PlanExtended) *PlanAnalyzer {
+	createTitle := fmt.Sprintf("%sTo Create", EmojiMap[Create])
+	updateTitle := fmt.Sprintf("%sTo Update", EmojiMap[Update])
+	destroyTitle := fmt.Sprintf("%sTo Destroy", EmojiMap[Destroy])
+	ReplaceTitle := fmt.Sprintf("%sTo Replace", EmojiMap[Replace])
+
 	return &PlanAnalyzer{
 		plans,
-		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		[][]string{{"Workspace", createTitle, updateTitle, destroyTitle, ReplaceTitle}},
 		map[string]map[string][]string{},
 		map[string][]string{},
 	}
