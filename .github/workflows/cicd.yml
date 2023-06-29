@@ -57,6 +57,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: haya14busa/action-update-semver@v1
       - uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
