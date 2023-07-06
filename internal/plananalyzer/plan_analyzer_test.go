@@ -102,8 +102,8 @@ func TestGenerateResourcesMultipleWorkspaces(t *testing.T) {
 
 	// Line is to long, so split it up
 	expected := "## Individual Workspaces\n### workspace1 :pencil2::wastebasket:\n"
-	expected = expected + "```diff\n+ To Create +\n```\n\n```diff\n- To Destroy -\n~ resource2\n```\n\n"
-	expected = expected + "### workspace2 :pencil2::wastebasket:\n```diff\n+ To Create +\n```\n\n```diff\n- To Destroy -\n~ resource2\n```\n\n"
+	expected = expected + "```diff\n- To Destroy -\n~ resource2\n```\n\n"
+	expected = expected + "### workspace2 :pencil2::wastebasket:\n```diff\n- To Destroy -\n~ resource2\n```\n\n"
 	result := planAnalyzer.generateResources()
 	assert.Equal(t, expected, result)
 }
