@@ -108,6 +108,97 @@ func TestGenerateResourcesMultipleWorkspaces(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
+func TestGenerateWorkspaceResourcesMultipleWorkspacesSomeUnique(t *testing.T) {
+
+	var changeSetOne = map[string][]string{
+		Create: {"resource1"},
+	}
+
+	var changeSetTwo = map[string][]string{
+		Create: {"resource1"},
+		Update: {"resource2"},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{
+			"workspace1": changeSetOne,
+			"workspace2": changeSetTwo,
+		},
+		map[string][]string{Create: {"resource1"}},
+	}
+
+	expectedOne := ""
+	expectedTwo := "### workspace2 :pencil2::fountain_pen:\n```diff\n! To Update !\n~ resource2\n```\n\n"
+
+	resultOne := planAnalyzer.GenerateWorkspaceResources("workspace1", changeSetOne)
+	resultTwo := planAnalyzer.GenerateWorkspaceResources("workspace2", changeSetTwo)
+
+	assert.Equal(t, expectedOne, resultOne)
+	assert.Equal(t, expectedTwo, resultTwo)
+}
+
+func TestGenerateWorkspaceResourcesMultipleWorkspacesNoUnique(t *testing.T) {
+
+	var changeSetOne = map[string][]string{
+		Create: {"resource1"},
+	}
+
+	var changeSetTwo = map[string][]string{
+		Create: {"resource1"},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{
+			"workspace1": changeSetOne,
+			"workspace2": changeSetTwo,
+		},
+		map[string][]string{Create: {"resource1"}},
+	}
+
+	expectedOne := ""
+	expectedTwo := ""
+
+	resultOne := planAnalyzer.GenerateWorkspaceResources("workspace1", changeSetOne)
+	resultTwo := planAnalyzer.GenerateWorkspaceResources("workspace2", changeSetTwo)
+
+	assert.Equal(t, expectedOne, resultOne)
+	assert.Equal(t, expectedTwo, resultTwo)
+}
+
+func TestGenerateWorkspaceResourcesMultipleWorkspacesOnlyUnique(t *testing.T) {
+
+	var changeSetOne = map[string][]string{
+		Create: {"resource1"},
+	}
+
+	var changeSetTwo = map[string][]string{
+		Create: {"resource2"},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{
+			"workspace1": changeSetOne,
+			"workspace2": changeSetTwo,
+		},
+		map[string][]string{},
+	}
+
+	expectedOne := "### workspace1 :pencil2:\n```diff\n+ To Create +\n~ resource1\n```\n\n"
+	expectedTwo := "### workspace2 :pencil2:\n```diff\n+ To Create +\n~ resource2\n```\n\n"
+
+	resultOne := planAnalyzer.GenerateWorkspaceResources("workspace1", changeSetOne)
+	resultTwo := planAnalyzer.GenerateWorkspaceResources("workspace2", changeSetTwo)
+
+	assert.Equal(t, expectedOne, resultOne)
+	assert.Equal(t, expectedTwo, resultTwo)
+}
+
 func TestGenerateWorkspaceResourcesNoUnique(t *testing.T) {
 
 	var changeSet = map[string][]string{
