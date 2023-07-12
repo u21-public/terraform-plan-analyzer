@@ -49,24 +49,38 @@ func (pa *PlanAnalyzer) ProcessPlans() {
 		})
 		pa.Changes[plan.Workspace] = plan.getActions()
 
+		// Start of each plan, reset the intersection so not to leak them between
+		// comparisons
+		intersection = map[string][]string{
+			Create:  {},
+			Destroy: {},
+			Update:  {},
+			Replace: {},
+		}
 		// Hash intersection for quick slice comparison
 		for _, action := range SupportedAction {
+			intersection[action] = []string{}
 			for _, address := range pa.Changes[plan.Workspace][action] {
 				if i == 0 {
 					hash[action][address] = true
 				} else {
 					if _, ok := hash[action][address]; ok {
-						if i == len(pa.Plans)-1 {
-							intersection[action] = append(intersection[action], address)
-						}
-					} else {
-						delete(hash[action], address)
+						intersection[action] = append(intersection[action], address)
 					}
 				}
 			}
 		}
-		pa.SharedChanges = intersection
+		// Sync the hash with the found intersection for the next loop of comparisons
+		if i != 0 {
+			for _, action := range SupportedAction {
+				hash[action] = map[string]bool{}
+				for _, address := range intersection[action] {
+					hash[action][address] = true
+				}
+			}
+		}
 	}
+	pa.SharedChanges = intersection
 }
 
 func (pa *PlanAnalyzer) GenerateLastUpdated() string {
