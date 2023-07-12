@@ -3,6 +3,7 @@ package plananalyzer
 import (
 	"testing"
 
+	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -295,4 +296,205 @@ func TestIsChangeUniqueNotUniqueEmptyUnique(t *testing.T) {
 	}
 	result := planAnalyzer.IsChangeUnique(Create, "resource1")
 	assert.Equal(t, true, result)
+}
+
+func TestProcessPlansSharedChangesNoShared(t *testing.T) {
+	plans := []PlanExtended{
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceOne",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource2"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		plans,
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+	planAnalyzer.ProcessPlans()
+	result := map[string][]string(map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {}})
+	assert.Equal(t, result, planAnalyzer.SharedChanges)
+}
+
+func TestProcessPlansSharedChangesOneShared(t *testing.T) {
+	plans := []PlanExtended{
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceOne",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		plans,
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+	planAnalyzer.ProcessPlans()
+	result := map[string][]string(map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {"resource1"}})
+	assert.Equal(t, result, planAnalyzer.SharedChanges)
+}
+
+func TestProcessPlansSharedChangesOneSharedAcrossMany(t *testing.T) {
+	plans := []PlanExtended{
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1", "resource2", "resource3"},
+			[]string{"resource2"},
+			[]string{"resource1"},
+			[]string{"resource1"},
+			"workspaceOne",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1", "resource3"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource3"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1", "resource3"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource2", "resource3"},
+			[]string{},
+			[]string{"resource1"},
+			[]string{"resource4"},
+			"workspaceTwo",
+		},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		plans,
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+	planAnalyzer.ProcessPlans()
+	result := map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {"resource3"}}
+	assert.Equal(t, result, planAnalyzer.SharedChanges)
+}
+
+func TestProcessPlansSharedChanges(t *testing.T) {
+	plans := []PlanExtended{
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1", "resource2", "resource3", "resource4"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceOne",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		plans,
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+	planAnalyzer.ProcessPlans()
+	result := map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {"resource1"}}
+	assert.Equal(t, result, planAnalyzer.SharedChanges)
+}
+
+func TestProcessPlansSharedPlansTwoSharedOneunique(t *testing.T) {
+	plans := []PlanExtended{
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceOne",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+		{
+			tfjson.Plan{},
+			[]*tfjson.ResourceChange{},
+			[]string{"resource1"},
+			[]string{},
+			[]string{},
+			[]string{},
+			"workspaceTwo",
+		},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		plans,
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+	planAnalyzer.ProcessPlans()
+	result := map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {}}
+	assert.Equal(t, result, planAnalyzer.SharedChanges)
 }
