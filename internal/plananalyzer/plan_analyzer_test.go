@@ -438,7 +438,7 @@ func TestProcessPlansSharedChanges(t *testing.T) {
 		{
 			tfjson.Plan{},
 			[]*tfjson.ResourceChange{},
-			[]string{},
+			[]string{"resource1"},
 			[]string{},
 			[]string{},
 			[]string{},
@@ -453,7 +453,7 @@ func TestProcessPlansSharedChanges(t *testing.T) {
 		map[string][]string{},
 	}
 	planAnalyzer.ProcessPlans()
-	result := map[string][]string{"Create": {}, "Destroy": {"resource1"}, "Replace": {}, "Update": {"resource1", "resource3"}}
+	result := map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {"resource1"}}
 	assert.Equal(t, result, planAnalyzer.SharedChanges)
 }
 
