@@ -49,24 +49,38 @@ func (pa *PlanAnalyzer) ProcessPlans() {
 		})
 		pa.Changes[plan.Workspace] = plan.getActions()
 
+		// Start of each plan, reset the intersection so not to leak them between
+		// comparisons
+		intersection = map[string][]string{
+			Create:  {},
+			Destroy: {},
+			Update:  {},
+			Replace: {},
+		}
 		// Hash intersection for quick slice comparison
 		for _, action := range SupportedAction {
+			intersection[action] = []string{}
 			for _, address := range pa.Changes[plan.Workspace][action] {
 				if i == 0 {
 					hash[action][address] = true
 				} else {
 					if _, ok := hash[action][address]; ok {
-						if i == len(pa.Plans)-1 {
-							intersection[action] = append(intersection[action], address)
-						}
-					} else {
-						delete(hash[action], address)
+						intersection[action] = append(intersection[action], address)
 					}
 				}
 			}
 		}
-		pa.SharedChanges = intersection
+		// Sync the hash with the found intersection for the next loop of comparisons
+		if i != 0 {
+			for _, action := range SupportedAction {
+				hash[action] = map[string]bool{}
+				for _, address := range intersection[action] {
+					hash[action][address] = true
+				}
+			}
+		}
 	}
+	pa.SharedChanges = intersection
 }
 
 func (pa *PlanAnalyzer) GenerateLastUpdated() string {
@@ -147,27 +161,39 @@ func (pa *PlanAnalyzer) generateResources() string {
 
 func (pa *PlanAnalyzer) GenerateWorkspaceResources(workspace string, changeSet map[string][]string) string {
 	var changes string
+	var actionChanges string // holds markdown changes for a given action, gets appened to changes
+	var hasUniqueChange bool // tracks if a given action for workspace has a unique change
 
 	// Due to filtering out shared changes as we go along, we use a count
 	// to determine if any unique changes even exist
 	resourceCount := 0
 
-	changes = changes + fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
+	changes += fmt.Sprintf("### %s %s\n", workspace, getEmojis(changeSet))
 	for _, action := range SupportedAction {
 		changedResources := changeSet[action]
 		result, _ := getGitDiff(action)
+		// Ensure the changes for the action starts as an empty block
+		actionChanges = ""
 
 		if len(changedResources) > 0 {
-			changes += "```diff\n"
-			changes += fmt.Sprintf("%s To %s %s\n", result, action, result)
+			hasUniqueChange = false
+			actionChanges += "```diff\n"
+			actionChanges += fmt.Sprintf("%s To %s %s\n", result, action, result)
 			for _, resource := range changedResources {
 				if pa.IsChangeUnique(action, resource) {
-					changes += fmt.Sprintf("~ %s\n", resource)
+					actionChanges += fmt.Sprintf("~ %s\n", resource)
 					resourceCount = resourceCount + 1
+					hasUniqueChange = true
 				}
 			}
-			changes += "```\n\n"
+			actionChanges += "```\n\n"
+			if !hasUniqueChange {
+				// If no Unique Changes found then reset the changes to blank string
+				// so no block is present
+				actionChanges = ""
+			}
 		}
+		changes += actionChanges
 	}
 
 	// Only occurs if zero unique resources were detected, in which case print nothing
