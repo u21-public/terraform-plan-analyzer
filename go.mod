@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/terraform-json v0.17.1
 	github.com/migueleliasweb/go-github-mock v0.0.20
 	github.com/stretchr/testify v1.8.4
-	github.com/urfave/cli/v2 v2.25.7
+	github.com/urfave/cli/v2 v2.26.0
 	golang.org/x/oauth2 v0.13.0
 )
 
