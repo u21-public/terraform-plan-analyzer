@@ -19,10 +19,6 @@ runs:
         cd ${{ inputs.path_to_terraform_root }}
         terraform-bin show -json ${{ inputs.plan_name }} > ${{ inputs.plan_name }}.json
       shell: bash
-    - name: Convert terraform plan to human-readable stdout
-      run: |
-        cd ${{ inputs.path_to_terraform_root }}
-      shell: bash
     - name: Cache terraform plan stdout and json
       uses: actions/upload-artifact@v3
       with:
