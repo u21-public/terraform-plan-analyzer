@@ -15,9 +15,10 @@ runs:
   using: composite
   steps:
     - name: Download Plans
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: ${{ inputs.plan_archive_id }}
+        pattern: ${{ inputs.plan_archive_id }}*
+        merge-multiple: true
         path: tfplans
     - name: get PR info
       id: get-pr-number

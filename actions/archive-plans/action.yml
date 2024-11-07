@@ -20,8 +20,8 @@ runs:
         terraform-bin show -json ${{ inputs.plan_name }} > ${{ inputs.plan_name }}.json
       shell: bash
     - name: Cache terraform plan stdout and json
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.plan_archive_id }}
+        name: ${{ inputs.plan_archive_id }}-${{ inputs.plan_name }}
         path: | 
           ${{ inputs.path_to_terraform_root }}/${{ inputs.plan_name }}.json
