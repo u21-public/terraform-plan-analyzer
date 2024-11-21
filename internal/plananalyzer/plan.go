@@ -67,28 +67,46 @@ func FilePathWalkDir(root string) ([]string, error) {
 	return files, err
 }
 
-func ParseWorkspaceName(planFileName string) (string, error) {
-	var planNoPrefix string
+func ParseWorkspaceName(planFileName string, formatByFolder bool) (string, error) {
+	var workspaceName string
+	var planBaseName string
 
-	planBaseName := filepath.Base(planFileName)
+	if formatByFolder {
+		planBaseName = planFileName
+	} else {
+		planBaseName = filepath.Base(planFileName)
+	}
 
 	if planBaseName == "." {
 		return "", errors.New("filename given was empty string")
 	}
 
 	planBaseNameSplit := strings.Split(planBaseName, ".json")
-	if len(planBaseNameSplit) > 0 {
-		planNoExt := planBaseNameSplit[0]
+	if len(planBaseName) == 1 {
+		return "", errors.New("plan filename must have a .json extension")
+	}
+
+	planNoExt := planBaseNameSplit[0]
+
+	if formatByFolder {
+		planNoPrefixSplit := strings.Split(planNoExt, "/tfplan")
+		if len(planNoPrefixSplit) == 1 {
+			return "", errors.New("plan filename must be tfplan.json")
+		}
+
+		workspaceName = planNoPrefixSplit[0]
+	} else {
 		planNoPrefixSplit := strings.Split(planNoExt, "tfplan-")
 
 		if len(planNoPrefixSplit) > 1 {
-			planNoPrefix = planNoPrefixSplit[1]
-			_ = planNoPrefix
+			workspaceName = planNoPrefixSplit[1]
+			_ = workspaceName
 		} else {
 			return "", errors.New("plan filename must be prefixed with tfplan-")
 		}
 	}
-	return planNoPrefix, nil
+
+	return workspaceName, nil
 }
 
 func ReadPlans(plansFolderPath string) []PlanExtended {
@@ -96,10 +114,12 @@ func ReadPlans(plansFolderPath string) []PlanExtended {
 
 	log.Println("Reading the plans in...`", plansFolderPath, "`")
 	files, err := FilePathWalkDir(plansFolderPath)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, file := range files {
+		log.Println(file)
 		plan := PlanExtended{}
 		jsonFile, err := os.Open(file)
 		if err != nil {
@@ -115,7 +135,13 @@ func ReadPlans(plansFolderPath string) []PlanExtended {
 			log.Println(err)
 		}
 		plan.Analyze()
-		workspace, err := ParseWorkspaceName(file)
+
+		fileRelativePath, err := filepath.Rel(plansFolderPath, file)
+		if err != nil {
+			log.Println(err)
+		}
+
+		workspace, err := ParseWorkspaceName(fileRelativePath, true)
 		if err != nil {
 			log.Println(err, "Arguments given: ", file)
 		}
