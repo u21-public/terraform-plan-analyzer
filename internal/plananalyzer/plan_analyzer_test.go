@@ -498,3 +498,14 @@ func TestProcessPlansSharedPlansTwoSharedOneunique(t *testing.T) {
 	result := map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {}}
 	assert.Equal(t, result, planAnalyzer.SharedChanges)
 }
+
+func TestGenerateComparisonTableEmpty(t *testing.T) {
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+	result := "| Workspace | To Create | To Update | To Destroy | To Replace |\n|-|:-:|:-:|:-:|:-:|\n\n\n"
+	assert.Equal(t, result, planAnalyzer.GenerateComparisonTable())
+}
