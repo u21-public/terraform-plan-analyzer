@@ -8,7 +8,7 @@ require (
 	github.com/migueleliasweb/go-github-mock v0.0.23
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
-	golang.org/x/oauth2 v0.23.0
+	golang.org/x/oauth2 v0.29.0
 )
 
 require (
