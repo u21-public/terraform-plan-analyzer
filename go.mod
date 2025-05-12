@@ -1,11 +1,11 @@
 module github.com/u21-public/terraform-bulk-analyzer
 
-go 1.20
+go 1.23.0
 
 require (
 	github.com/google/go-github/v50 v50.2.0
 	github.com/hashicorp/terraform-json v0.24.0
-	github.com/migueleliasweb/go-github-mock v0.0.23
+	github.com/migueleliasweb/go-github-mock v1.3.0
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/oauth2 v0.23.0
@@ -17,7 +17,7 @@ require (
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/google/go-github/v59 v59.0.0 // indirect
+	github.com/google/go-github/v71 v71.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
