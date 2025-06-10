@@ -1,6 +1,6 @@
 module github.com/u21-public/terraform-bulk-analyzer
 
-go 1.20
+go 1.22.0
 
 require (
 	github.com/google/go-github/v50 v50.2.0
@@ -14,7 +14,7 @@ require (
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/go-github/v59 v59.0.0 // indirect
