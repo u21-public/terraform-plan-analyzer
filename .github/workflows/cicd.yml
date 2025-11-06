@@ -9,7 +9,7 @@ on:
 
 env:
   GO_VERSION: '1.23'
-  GO_LINT_VERSION: v1.51.2
+  GO_LINT_VERSION: v1.64.1
 
 permissions:
   contents: write

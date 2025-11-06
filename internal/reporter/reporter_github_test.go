@@ -34,7 +34,7 @@ func TestGetReportCommentListCommentError(t *testing.T) {
 	mockedHTTPClient := mock.NewMockedHTTPClient(
 		mock.WithRequestMatchHandler(
 			mock.GetReposIssuesCommentsByOwnerByRepoByIssueNumber,
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				mock.WriteError(
 					w,
 					http.StatusInternalServerError,
@@ -154,7 +154,7 @@ func TestPostReportIssueEditError(t *testing.T) {
 		),
 		mock.WithRequestMatchHandler(
 			mock.PatchReposIssuesCommentsByOwnerByRepoByCommentId,
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				mock.WriteError(
 					w,
 					http.StatusInternalServerError,
@@ -185,7 +185,7 @@ func TestPostReportIssueCreateError(t *testing.T) {
 		),
 		mock.WithRequestMatchHandler(
 			mock.PostReposIssuesCommentsByOwnerByRepoByIssueNumber,
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				mock.WriteError(
 					w,
 					http.StatusInternalServerError,
