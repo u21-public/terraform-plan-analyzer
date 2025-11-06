@@ -194,7 +194,7 @@ Last Updated: `2023-06-22 18:25:15.707233069 +0000 UTC m=+0.079645794`
 
 ## Pre-requisites
 
-- [Go](https://golang.org/dl/) v1.20
+- [Go](https://golang.org/dl/) v1.23
 
 ## Commands
 ### Setup
