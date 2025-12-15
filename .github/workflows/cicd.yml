@@ -8,8 +8,8 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
-  GO_VERSION: '1.20'
-  GO_LINT_VERSION: v1.51.2
+  GO_VERSION: '1.24'
+  GO_LINT_VERSION: v1.64.8
 
 permissions:
   contents: write
@@ -58,10 +58,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: haya14busa/action-update-semver@v1
-      - uses: goreleaser/goreleaser-action@v4
+      - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: ~> v2
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
