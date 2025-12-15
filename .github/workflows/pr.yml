@@ -11,7 +11,7 @@ on:
 
 env:
   GO_VERSION: '1.24'
-  GO_LINT_VERSION: v1.51.2
+  GO_LINT_VERSION: v1.64.8
 
 jobs:
   lint:
