@@ -3,7 +3,7 @@ SRC_ROOT=.
 .PHONY: setup
 setup:
 	@echo "Setting up tools..."
-	@test -x ${GOPATH}/bin/golangci-lint || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+	@test -x ${GOPATH}/bin/golangci-lint || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 	@test -x "$(which pre-commit)" || pip install pre-commit
 	@pre-commit install
 	@pre-commit install-hooks
