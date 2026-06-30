@@ -29,11 +29,22 @@ func main() {
 				Name:  "github",
 				Usage: "Posts report to github PR",
 			},
+			&cli.BoolFlag{
+				Name:  "summary",
+				Usage: "Prints machine-readable summary line to stdout (V8: only under this flag; never injected into PR comment body)",
+			},
 		},
 		Action: func(cCtx *cli.Context) error {
 			plans := plananalyzer.ReadPlans(cCtx.String("tfplans"))
 			analyzedPlans := plananalyzer.NewPlanAnalyzer(plans)
 			analyzedPlans.ProcessPlans()
+
+			if cCtx.Bool("summary") {
+				s := analyzedPlans.Summarize()
+				fmt.Printf("::summary:: created=%d modified=%d destroyed=%d replaced=%d workspace_count=%d\n",
+					s.Created, s.Modified, s.Destroyed, s.Replaced, s.WorkspaceCount)
+			}
+
 			report := analyzedPlans.GenerateReport()
 
 			var reporterType string
