@@ -1,8 +1,6 @@
 module github.com/u21-public/terraform-bulk-analyzer
 
-go 1.24.0
-
-toolchain go1.24.5
+go 1.25.0
 
 require (
 	github.com/google/go-github/v50 v50.2.0
@@ -10,7 +8,7 @@ require (
 	github.com/migueleliasweb/go-github-mock v0.0.23
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.7
-	golang.org/x/oauth2 v0.34.0
+	golang.org/x/oauth2 v0.36.0
 )
 
 require (
