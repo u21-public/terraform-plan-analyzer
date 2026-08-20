@@ -2,7 +2,9 @@ package reporter
 
 import (
 	"net/http"
+	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
@@ -261,4 +263,29 @@ func TestPostReportIssue(t *testing.T) {
 	}
 	err := githubReporter.PostReport()
 	assert.Equal(t, err, nil)
+}
+
+func TestTruncateReportLeavesSmallReportUnchanged(t *testing.T) {
+	report := "Terraform Plan Analyzer Report"
+
+	assert.Equal(t, report, truncateReport(report))
+}
+
+func TestTruncateReportFitsGithubLimit(t *testing.T) {
+	report := strings.Repeat("a", githubCommentMaxBytes+1)
+
+	truncated := truncateReport(report)
+
+	assert.Len(t, truncated, githubCommentMaxBytes)
+	assert.True(t, strings.HasSuffix(truncated, truncatedReportNotice))
+}
+
+func TestTruncateReportPreservesUnicodeBoundaries(t *testing.T) {
+	report := strings.Repeat("🙂", githubCommentMaxBytes)
+
+	truncated := truncateReport(report)
+
+	assert.LessOrEqual(t, len(truncated), githubCommentMaxBytes)
+	assert.True(t, utf8.ValidString(truncated))
+	assert.True(t, strings.HasSuffix(truncated, truncatedReportNotice))
 }

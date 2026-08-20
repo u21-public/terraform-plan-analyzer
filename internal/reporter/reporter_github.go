@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/google/go-github/v50/github"
 )
 
 const (
-	GithubAPIPageLimit int = 30
+	GithubAPIPageLimit    int = 30
+	githubCommentMaxBytes     = 60000
+	truncatedReportNotice     = "\n\n> ⚠️ Report truncated to fit GitHub's comment limit. See the workflow artifacts and individual workspace plan comments for full details."
 )
 
 type GithubReporter struct {
@@ -60,8 +63,9 @@ func (r *GithubReporter) PostReport() error {
 		return err
 	}
 
+	reportBody := truncateReport(r.Report)
 	report := github.IssueComment{
-		Body: &r.Report,
+		Body: &reportBody,
 	}
 
 	reportComment, err := r.GetReportComment(issue)
@@ -80,4 +84,17 @@ func (r *GithubReporter) PostReport() error {
 
 	fmt.Println("Posted to Github!, (Repo:", r.Repo, ", Issue:", r.Issue, ")")
 	return nil
+}
+
+func truncateReport(report string) string {
+	if len(report) <= githubCommentMaxBytes {
+		return report
+	}
+
+	truncated := report[:githubCommentMaxBytes-len(truncatedReportNotice)]
+	for !utf8.ValidString(truncated) {
+		truncated = truncated[:len(truncated)-1]
+	}
+
+	return truncated + truncatedReportNotice
 }
