@@ -1,6 +1,7 @@
 package plananalyzer
 
 import (
+	"strings"
 	"testing"
 
 	tfjson "github.com/hashicorp/terraform-json"
@@ -497,4 +498,134 @@ func TestProcessPlansSharedPlansTwoSharedOneunique(t *testing.T) {
 	planAnalyzer.ProcessPlans()
 	result := map[string][]string{"Create": {}, "Destroy": {}, "Replace": {}, "Update": {}}
 	assert.Equal(t, result, planAnalyzer.SharedChanges)
+}
+
+func TestGenerateComparisonTableEmpty(t *testing.T) {
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+	expected := "| Workspace | To Create | To Update | To Destroy | To Replace |\n|-|:-:|:-:|:-:|:-:|\n\n\n"
+	assert.Equal(t, expected, planAnalyzer.GenerateComparisonTable())
+}
+
+func TestGenerateComparisonTableWithWorkspaces(t *testing.T) {
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{
+			{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"},
+			{"workspace1", "2", "1", "0", "0"},
+			{"workspace2", "0", "0", "1", "1"},
+		},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+
+	expected := "| Workspace | To Create | To Update | To Destroy | To Replace |\n"
+	expected += "|-|:-:|:-:|:-:|:-:|\n"
+	expected += "| workspace1 | 2 | 1 | 0 | 0 |\n"
+	expected += "| workspace2 | 0 | 0 | 1 | 1 |\n"
+	expected += "\n\n"
+
+	assert.Equal(t, expected, planAnalyzer.GenerateComparisonTable())
+}
+
+func TestGenerateLastUpdated(t *testing.T) {
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"}},
+		map[string]map[string][]string{},
+		map[string][]string{},
+	}
+
+	result := planAnalyzer.GenerateLastUpdated()
+	assert.Contains(t, result, "Last Updated: `")
+	assert.True(t, strings.HasSuffix(result, "`\n\n"))
+}
+
+func TestGenerateReport(t *testing.T) {
+	changeSet := map[string][]string{
+		Create:  {"resource1"},
+		Destroy: {"resource2"},
+	}
+
+	planAnalyzer := &PlanAnalyzer{
+		[]PlanExtended{},
+		[][]string{
+			{"Workspace", "To Create", "To Update", "To Destroy", "To Replace"},
+			{"workspace1", "1", "0", "1", "0"},
+		},
+		map[string]map[string][]string{
+			"workspace1": changeSet,
+		},
+		map[string][]string{Create: {"resource1"}},
+	}
+
+	result := planAnalyzer.GenerateReport()
+
+	assert.Contains(t, result, "# :clipboard: Terraform Plan Analyzer Report! :clipboard:\n")
+	assert.Contains(t, result, "Last Updated: `")
+	assert.Contains(t, result, "| Workspace | To Create | To Update | To Destroy | To Replace |\n|-|:-:|:-:|:-:|:-:|\n| workspace1 | 1 | 0 | 1 | 0 |\n\n\n")
+	assert.Contains(t, result, "## All Workspaces:pencil2:\n```diff\n+ To Create +\n~ resource1\n```\n\n")
+	assert.Contains(t, result, "## Individual Workspaces\n### workspace1 :pencil2::wastebasket:\n```diff\n- To Destroy -\n~ resource2\n```\n\n")
+}
+
+func TestGenerateReportEmpty(t *testing.T) {
+	planAnalyzer := NewPlanAnalyzer([]PlanExtended{})
+	planAnalyzer.ProcessPlans()
+
+	result := planAnalyzer.GenerateReport()
+
+	assert.Contains(t, result, "# :clipboard: Terraform Plan Analyzer Report! :clipboard:\n")
+	assert.Contains(t, result, "Last Updated: `")
+	assert.Contains(t, result, "| Workspace | :pencil2:To Create | :fountain_pen:To Update | :wastebasket:To Destroy | :scissors:To Replace |\n|-|:-:|:-:|:-:|:-:|\n\n\n")
+	assert.NotContains(t, result, "## All Workspaces")
+	assert.NotContains(t, result, "## Individual Workspaces")
+}
+
+func TestProcessPlansComparisonTable(t *testing.T) {
+	plans := []PlanExtended{
+		{
+			Plan:      tfjson.Plan{},
+			ChangeSet: []*tfjson.ResourceChange{},
+			ToUpdate:  []string{"resource-update"},
+			ToCreate:  []string{"resource-create", "resource-create-2"},
+			ToDestroy: []string{},
+			ToReplace: []string{"resource-replace"},
+			Workspace: "workspaceOne",
+		},
+		{
+			Plan:      tfjson.Plan{},
+			ChangeSet: []*tfjson.ResourceChange{},
+			ToUpdate:  []string{},
+			ToCreate:  []string{},
+			ToDestroy: []string{"resource-destroy"},
+			ToReplace: []string{},
+			Workspace: "workspaceTwo",
+		},
+	}
+
+	planAnalyzer := NewPlanAnalyzer(plans)
+	planAnalyzer.ProcessPlans()
+
+	expected := [][]string{
+		{"Workspace", ":pencil2:To Create", ":fountain_pen:To Update", ":wastebasket:To Destroy", ":scissors:To Replace"},
+		{"workspaceOne", "2", "1", "0", "1"},
+		{"workspaceTwo", "0", "0", "1", "0"},
+	}
+	assert.Equal(t, expected, planAnalyzer.ComparisonTable)
+	assert.Equal(t, map[string][]string{
+		Create:  {"resource-create", "resource-create-2"},
+		Destroy: {},
+		Replace: {"resource-replace"},
+		Update:  {"resource-update"},
+	}, planAnalyzer.Changes["workspaceOne"])
+	assert.Equal(t, map[string][]string{
+		Create:  {},
+		Destroy: {"resource-destroy"},
+		Replace: {},
+		Update:  {},
+	}, planAnalyzer.Changes["workspaceTwo"])
 }
