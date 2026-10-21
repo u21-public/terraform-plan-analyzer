@@ -2,15 +2,35 @@ name: Analyze Plans
 description: Unstashes plans and runs report on them
 inputs:
   plan_archive_id:
-    type: string
+    description: Prefix of the artifact name to download (e.g. tfplan)
     default: tfplan
   gh_token:
-    type: string
+    description: GitHub token used to post the PR comment
     required: true
   version:
-    type: string
+    description: Version tag of the terraform-plan-analyzer Docker image to run
     required: false
     default: "0.5.0"
+  enable_summary:
+    description: "Pass --summary to the analyzer and emit created/modified/destroyed/replaced/workspace_count as step outputs. Only supported on version >= 1.3.0."
+    required: false
+    default: "false"
+outputs:
+  created:
+    description: Total resources to be created across all plans
+    value: ${{ steps.run-report.outputs.created }}
+  modified:
+    description: Total resources to be modified across all plans
+    value: ${{ steps.run-report.outputs.modified }}
+  destroyed:
+    description: Total resources to be destroyed (pure deletes only; replacements excluded) across all plans
+    value: ${{ steps.run-report.outputs.destroyed }}
+  replaced:
+    description: Total resources to be replaced (create-before-destroy or destroy-before-create) across all plans
+    value: ${{ steps.run-report.outputs.replaced }}
+  workspace_count:
+    description: Number of distinct workspaces analyzed
+    value: ${{ steps.run-report.outputs.workspace_count }}
 runs:
   using: composite
   steps:
@@ -35,9 +55,24 @@ runs:
         GITHUB_REPO: ${{ github.event.repository.name }}
         GITHUB_PR_NUMBER: ${{ steps.get-pr-number.outputs.pr_number }}
         VERSION: ${{ inputs.version }}
+        ENABLE_SUMMARY: ${{ inputs.enable_summary }}
       run: |
+        set -eo pipefail
+        SUMMARY_FLAG=""
+        if [ "$ENABLE_SUMMARY" = "true" ]; then
+          SUMMARY_FLAG="--summary"
+        fi
+
         docker run \
           -v "$(pwd)/tfplans/:/tfplans" \
-          -e GITHUB_TOKEN -e GITHUB_OWNER -e GITHUB_PR_NUMBER --env GITHUB_REPOSITORY=${{ env.GITHUB_REPO }}\
+          -e GITHUB_TOKEN -e GITHUB_OWNER -e GITHUB_PR_NUMBER --env GITHUB_REPOSITORY=${{ env.GITHUB_REPO }} \
           ghcr.io/u21-public/terraform-plan-analyzer:${{ env.VERSION }} \
-          --tfplans /tfplans --github
+          --tfplans /tfplans --github $SUMMARY_FLAG \
+          | tee /tmp/plan-output.txt
+
+        if [ "$ENABLE_SUMMARY" = "true" ]; then
+          summary_line=$(grep "^::summary::" /tmp/plan-output.txt || true)
+          if [ -n "$summary_line" ]; then
+            echo "$summary_line" | sed 's/^::summary:: //' | tr ' ' '\n' >> "$GITHUB_OUTPUT"
+          fi
+        fi
