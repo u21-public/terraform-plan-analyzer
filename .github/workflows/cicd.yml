@@ -8,7 +8,7 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
-  GO_VERSION: '1.24'
+  GO_VERSION: '1.27.3'
   GO_LINT_VERSION: v1.64.8
 
 permissions:
