@@ -122,6 +122,48 @@ func TestAnalyzeDestroyPath(t *testing.T) {
 	assert.Equal(t, len(ToDestroy), 1, "Plan should destroy one example bucket")
 }
 
+// TestAnalyzePath_ReplaceCBD verifies that a create-before-destroy replacement
+// lands in ToReplace, not ToDestroy (V2: safe replacements excluded from destroy count).
+func TestAnalyzePath_ReplaceCBD(t *testing.T) {
+	directory := t.TempDir()
+	destinationFile, err := os.CreateTemp(directory, "tfplan-file1.tf")
+	if err != nil {
+		log.Fatal("Error occurred while creating temporarily files in directory")
+	}
+	absPath, _ := filepath.Abs("../../examples/plans_json/basic_example/tfplan-example4-replace-cbd.json")
+	input, _ := os.ReadFile(absPath)
+	writeErr := os.WriteFile(destinationFile.Name(), input, 0644)
+	if writeErr != nil {
+		log.Fatal("Error occurred while writing files to destination file")
+	}
+
+	plansList := ReadPlans(directory)
+	assert.Equal(t, 1, len(plansList[0].ToReplace), "replace-cbd: ToReplace should be 1")
+	assert.Equal(t, 0, len(plansList[0].ToDestroy), "replace-cbd: ToDestroy must be 0 — safe replacement must not count as destroy (V2)")
+}
+
+// TestAnalyzePath_Forget verifies that a forget action (removed from state without
+// destroying infra) does not populate any bucket, especially not ToDestroy (V2).
+func TestAnalyzePath_Forget(t *testing.T) {
+	directory := t.TempDir()
+	destinationFile, err := os.CreateTemp(directory, "tfplan-file1.tf")
+	if err != nil {
+		log.Fatal("Error occurred while creating temporarily files in directory")
+	}
+	absPath, _ := filepath.Abs("../../examples/plans_json/basic_example/tfplan-example5-forget.json")
+	input, _ := os.ReadFile(absPath)
+	writeErr := os.WriteFile(destinationFile.Name(), input, 0644)
+	if writeErr != nil {
+		log.Fatal("Error occurred while writing files to destination file")
+	}
+
+	plansList := ReadPlans(directory)
+	assert.Equal(t, 0, len(plansList[0].ToDestroy), "forget: ToDestroy must be 0 — forget must not count as destroy (V2)")
+	assert.Equal(t, 0, len(plansList[0].ToCreate), "forget: ToCreate should be 0")
+	assert.Equal(t, 0, len(plansList[0].ToUpdate), "forget: ToUpdate should be 0")
+	assert.Equal(t, 0, len(plansList[0].ToReplace), "forget: ToReplace should be 0")
+}
+
 func TestReadPlansInexistentDir(t *testing.T) {
 	fakeDirPath := "fake_directory"
 	if os.Getenv("EXIT_ONE") == "1" {

@@ -1,6 +1,6 @@
 module github.com/u21-public/terraform-bulk-analyzer
 
-go 1.24.0
+go 1.27.0
 
 toolchain go1.27.3
 
