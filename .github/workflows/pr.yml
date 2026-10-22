@@ -10,8 +10,8 @@ on:
       - master
 
 env:
-  GO_VERSION: '1.24'
-  GO_LINT_VERSION: v1.64.8
+  GO_VERSION: '1.27.3'
+  GO_LINT_VERSION: v2.15.0
 
 jobs:
   lint:
@@ -24,7 +24,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       - uses: actions/checkout@v3
       - name: Lint module
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v8
         with:
           version: ${{ env.GO_LINT_VERSION }}
   unit-tests:

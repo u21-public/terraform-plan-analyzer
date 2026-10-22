@@ -75,5 +75,5 @@ func NewReporter(reporterType string, report string) (Reporter, error) {
 			report,
 		}, nil
 	}
-	return nil, errors.New("Incompatible Reporter specific. Must be github or basic")
+	return nil, errors.New("incompatible reporter specified: must be github or basic")
 }
