@@ -8,7 +8,7 @@ require (
 	github.com/google/go-github/v50 v50.2.0
 	github.com/hashicorp/terraform-json v0.27.2
 	github.com/migueleliasweb/go-github-mock v0.0.23
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/oauth2 v0.34.0
 )
